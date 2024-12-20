@@ -21,7 +21,7 @@ pip install --upgrade pip
 Cloning the package
 
 ```bash
-git clone ##put the github link here # clone repo
+git clone https://github.com/jaeyoungchoilab/Pocky.git # clone repo
 cd Pocky
 
 # after you have cloned the github, you can run
