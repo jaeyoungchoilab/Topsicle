@@ -82,12 +82,12 @@ python3 overview_plot.py \
 
 Descriptive plot: 
 
-![Descriptive plot](./Topsicle/Topsicle_demo/result_all/descriptive_plot_1.png)
+![Descriptive plot](Topsicle_demo/result_all/descriptive_plot_1.png)
 
 
 Heatmap:
 
-![Heatmap](./Topsicle/Topsicle_demo/result_all/heatmap_1.png)
+![Heatmap](Topsicle_demo/result_all/heatmap_1.png)
 
 
 ### 2.2: Telomere length finding - main.py
@@ -116,7 +116,7 @@ python3 main.py \
 
 Mean window change plot:
 
-![Mean window](./Topsicle/Topsicle_demo/result_all/plot_4_1.png)
+![Mean window](Topsicle_demo/result_all/plot_4_1.png)
 
 
 ### 2.3: Flags: 
@@ -164,7 +164,7 @@ The pattern input should be the pattern at 5 prime of the read. For example, in 
 Sometimes, input can be missing or in wrong format, and the code will not have any output then. Missing flag can be a reason for 
 
 ### 3.2. Run out of memory 
-- Check if you printed out so many plots or not (--plot)
-- Also double check the memory allowance 
+1. Check if you printed out so many plots or not (--plot)
+2. Double check the memory allowance 
 
 
