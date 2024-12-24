@@ -26,7 +26,7 @@ from matplotlib.gridspec import GridSpec
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 colors = sns.color_palette("colorblind",n_colors=30)  
 # import our package here 
-from Pocky.allsteps import *
+from Topsicle.allsteps import *
 
 sns.set_style("whitegrid", {'grid.color': 'grey', 'grid.linestyle': '--'})
 
@@ -121,7 +121,7 @@ def analysis_run(args):
     return bound_all_detected_df
 
 version_number = "1.0.0"
-BoundTeloNano_output_prefix = "Pocky"
+Topsicle_output_prefix = "Topsicle"
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Command line input handling for run_analysis function')

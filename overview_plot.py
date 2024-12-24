@@ -1,5 +1,5 @@
-# This script is used to run the Pocky analysis on a set of fastq or fasta files.
-# it will return a lot of files
+# This script is used to run the Topsicle analysis on a set of fastq or fasta files.
+# it will return a lot of files - descriptive plot, heatmap and mean window plots 
 
 import sys
 import os
@@ -17,11 +17,11 @@ import matplotlib.pyplot as plt
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 colors = sns.color_palette("colorblind",n_colors=30)
 
-from Pocky.descriptive_plot import *
+from Topsicle.descriptive_plot import *
 sns.set_style("whitegrid", {'grid.color': 'grey', 'grid.linestyle': '--'})
 
 version_number = "1.0.0"
-Pocky_output_prefix = "Pocky"
+Topsicle_output_prefix = "Topsicle"
 
 def plot_running(args):
     # # checking inputs first 
