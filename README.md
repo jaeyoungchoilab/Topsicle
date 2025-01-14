@@ -2,7 +2,7 @@
 
 This package is used to identify telomere boundary in long read sequencing (ONT and PacBio). 
 
-Topsicle gets inputs in format as either fasta (or fasta.gz) or fastq (or fastq.gz), along with other parameters about telomere patterns (see section 2), then output with the length of each read within that input file in a .csv file, and supplemental plots. 
+Topsicle gets inputs in format as either fasta (or fasta.gz) or fastq (or fastq.gz), along with other parameters about telomere patterns (see section 2), then output with the length of each read within that input file in a .csv file and supplemental plots. 
 
 ## 0. Table of contents
 
@@ -19,6 +19,7 @@ Topsicle gets inputs in format as either fasta (or fasta.gz) or fastq (or fastq.
 ## 1. Getting started
 
 Let's get started with cloning this package from GitHub: 
+
 ### 1.1. From source (GitHub)
 
 Make new environment for this package 
@@ -30,7 +31,7 @@ pip install --upgrade pip
 
 ```
 
-Cloning the package
+Cloning the package: [Topsicle](https://github.com/jaeyoungchoilab/Topsicle.git)
 
 ```bash
 git clone https://github.com/jaeyoungchoilab/Topsicle.git # clone repo
@@ -59,16 +60,16 @@ pandas==2.2.0
 ruptures==1.1.9
 seaborn==0.11.2
 ```
-Topsicle was developed in Python 3.6, but still works well in Python versions 3.10 and 3.12. 
+Topsicle was developed in Python 3.6, but also passed tests in Python versions 3.10 and 3.12. 
 
 ## 2. Usage 
 
-Using Topsicle, you can have an overview of where are telomere patterns within the sequence with overview_plot.py, or jump right into the main analysis with main.py as below.  
+Using Topsicle, you can have an overview of where are telomere patterns within the sequence with [overview_plot.py](#21-descriptive-plots---overview_plotpy), or jump right into the main analysis to get telomere lengths in reads using [main.py](#22-telomere-length-finding---mainpy).  
 
-The full directory with code and results are in **Topsicle_demo** folder. After running it, it will return a .csv file (telolength_all.csv) for all telomere length of reads in the input, descriptive plots, heatmaps and the mean window change visualizations.
+The full directory with code and results are in [Topsicle_demo](Topsicle_demo). After running it, it will return a .csv file (telolength_all.csv) for all telomere length of reads in the input, a temp_result.csv file writing the result in real time in case the analysis sudden stop (usually when the file is more than 3MB) descriptive plots, heatmaps and mean window change visualizations.
 
 ### 2.1: Descriptive plots - overview_plot.py
-This code will output overview plot of locations of telomere pattern (or snippet of telomere pattern) in the sequence, run the code below:
+This code will output overview plot of locations of telomere pattern (or snippet of telomere pattern) in the sequence and heatmap. Run the code as below:
 
 ```bash
 python3 overview_plot.py \
@@ -80,12 +81,11 @@ python3 overview_plot.py \
   --recfindingpattern
 ```
 
-Descriptive plot: 
+**Descriptive plot** (of first 30 reads in chromosome 1): 
 
 ![Descriptive plot](Topsicle_demo/result_all/descriptive_plot_1.png)
 
-
-Heatmap:
+**Heatmap:**
 
 ![Heatmap](Topsicle_demo/result_all/heatmap_1.png)
 
@@ -94,9 +94,9 @@ Heatmap:
 Output a .csv file containing read ID and telomere length of each read for all the reads in that inputDir which passed basic filtering (>9kbp).
 
 The script can be run from the command line as below, as an example of using all flags, which will output:
-- a .csv file with file number, IDs of reads in that file, and telomere length (default, always output this)
-- plots of mean window changes and boundary points for each read tail, either start or end tail or both (flag --plot).
-- a .csv file of rawcount to know what specific patterns contribute to the mean window changes (flag --rawcountpattern)
+- a [.csv file](Topsicle_demo/telolengths_all.csv) with file number, IDs of reads in that file, and telomere length (default, always output this)
+- [plots](Topsicle_demo/result_all/plot_4_1.png) of mean window changes and boundary points for each read tail, either start or end tail or both (flag --plot).
+- a [.csv file](Topsicle_demo/result_all/rawcount_4_1.csv) of rawcount to know what specific patterns contribute to the mean window changes (flag --rawcountpattern)
 
 ```bash
 python3 main.py \
@@ -114,19 +114,19 @@ python3 main.py \
   --rawcountpattern
 ```
 
-Mean window change plot:
+**Mean window change plot** of one read in chromosome 1:
 
 ![Mean window](Topsicle_demo/result_all/plot_4_1.png)
 
 
-### 2.3: Flags: 
+### 2.3: Flags and explanations: 
 
 ```
   -h, --help            show this help message and exit
   --inputDir INPUTDIR   Path to the input folder directory
   --outputDir OUTPUTDIR
                         Path to the output folder directory
-  --pattern PATTERN     Telomere pattern, in Mver, AAACCG
+  --pattern PATTERN     Telomere pattern, in human, TTAGGG
   --minSeqLength MINSEQLENGTH
                         Minimum of long read sequence, default = 9kbp
   --rawcountpattern     Print raw count of number of times see that pattern in
@@ -149,9 +149,9 @@ Mean window change plot:
 
 ### 2.4: Brief explanation of Topsicle workflow 
 1. We have an initial pattern that we want to look for (for example, the telomere pattern of Arabidopsis thaliana Col-0 strand is "CCCTAAA"). Since this desired pattern has 7 base pairs (7-bp), and long read sequence methods (Oxford Nanopore Technologies, PacBio HiFi,...) can have random sequencing errors, identifying a k-mer (a subset) of that 7-bp pattern will be less specificity than finding whole 7-bp. Pocky generates phrases of that strand to the length we want, for example 4-bp or 5-bp from 7-bp (--telophrase). Let's call them "k-mer patterns". 
-2. Optional step 0: Overview descriptive plot to see if input read has telomere or not by marking location of telomere pattern found in that read (section 2.2)
-3. Step 1: If that read has telomere at 5' end, first 1000bp should also have telomere-phrase patterns there. Checking first 1kbp will have the proportion of telomere-phrase patterns (TRC value), and the read will be marked as having telomere if its TRC value is larger than the TRC cutoff value (--cutoff). 
-4. Step 2: After identifying which read has telomere, Pocky finds how long is that telomere by sliding (--slide) through window (--windowSize), counting the mean of number of patterns found within that window, and returning the boundary point between telomere and non-telomere region as the window with the mean value drops significantly. 
+2. [Optional step 0](#21-descriptive-plots---overview_plotpy): Overview descriptive plot to see if input read has telomere or not by marking location of telomere pattern found in that read. This step can also get heatmap for general observation of tandem repeat we can expect to see and interpret if the analysis goes wrong at any point.
+3. [Step 1](#22-telomere-length-finding---mainpy): If that read has telomere at 5' end, first 1000bp should also have telomere-phrase patterns there. Checking first 1kbp will have the proportion of telomere-phrase patterns (TRC value), and the read will be marked as having telomere if its TRC value is larger than the TRC cutoff value (--cutoff). 
+4. [Step 2](#22-telomere-length-finding---mainpy): After identifying which read has telomere, Topsicle finds how long is that telomere by sliding (--slide) through window (--windowSize), counting the mean of number of patterns found within that window, and returning the boundary point between telomere and non-telomere region as the window with the mean value drops significantly. 
 5. Optional step 3: If we want to know what kmer-bp pattern (kmer < initial length of telomere pattern), we use the flag --rawcountpattern to return a .csv file with location of window start, pattern, number of pattern in that window. 
 
 ## 3. Troubleshooting
@@ -161,10 +161,15 @@ Mean window change plot:
 The pattern input should be the pattern at 5 prime of the read. For example, in Col-0 A.thaliana, this pattern should be 'CCCTAAA' (telomere pattern found at 5 prime), not 'TTTAGGG' (telomere pattern found at 3 prime). 
 
 2. Check flags and input 
-Sometimes, input can be missing or in wrong format, and the code will not have any output then. Missing flag can be a reason for 
+Sometimes, input can be missing or in wrong format, and the code will not have any output then. Missing flag can be a reason for not being able to run as well.
 
 ### 3.2. Run out of memory 
 1. Check if you printed out so many plots or not (--plot)
 2. Double check the memory allowance 
+
+### 3.3: Not enough resources
+This issue usually appears when running whole genome analysis but use less than 8 CPU cores in 24 hours for testing file that is more than 5GB (observations based on testing trials on KU HPC)
+1. It is recommended to have more resources allocate - maybe more CPU, more time or more other resources. If possible, breaking down the file into several 1GB files and submit several jobs can also help. 
+2. If the analysis keeps cancelled after several attempts and we do not need whole genome analysis, consider using temp_result.csv files instead, since it checks an amount of reads already.
 
 

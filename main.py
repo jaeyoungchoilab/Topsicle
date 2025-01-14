@@ -1,4 +1,4 @@
-# This script is used to run the BoundTeloNano analysis on a set of fastq or fasta files.
+# This script is used to run the Topsicle analysis on a set of fastq or fasta files.
 
 import sys
 import os
@@ -9,13 +9,18 @@ from Bio import SeqIO
 # os.environ['MPLCONFIGDIR'] = os.path.join(os.path.dirname(__file__), 'config')
 
 #for parallel 
-from multiprocessing import Pool
-from multiprocessing import cpu_count
+import multiprocessing
+from multiprocessing import Pool, Manager, Lock, cpu_count
 
 import argparse
+
+# result output
 import seaborn as sns
 import matplotlib.pyplot as plt
-from matplotlib.gridspec import GridSpec
+colors = sns.color_palette("colorblind",n_colors=30) 
+sns.set_style("whitegrid", {'grid.color': 'grey', 'grid.linestyle': '--'})
+
+import csv # useful in case slurm ran out of time 
 
 # for validate performance 
 # import cProfile
@@ -24,11 +29,8 @@ from matplotlib.gridspec import GridSpec
 
 # Add project root to sys.path 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-colors = sns.color_palette("colorblind",n_colors=30)  
 # import our package here 
 from Topsicle.allsteps import *
-
-sns.set_style("whitegrid", {'grid.color': 'grey', 'grid.linestyle': '--'})
 
 verbose = False
 def vprint(*args, **kwargs):
@@ -36,13 +38,16 @@ def vprint(*args, **kwargs):
         print(*args, **kwargs)
 
 #check number of cores 
-num_cores = cpu_count()
-print(f"Number of cores: {num_cores}")
+try:
+    num_cores = len(os.sched_getaffinity(0))
+    print(f"Number of allocated cores: {num_cores}")
+except AttributeError:
+    # Fallback for systems
+    print(f"Number of cores: {cpu_count()}")
 
-def process_file(args, seq_loc, telo_phrase, pattern):
+def process_file(args, seq_loc, telo_phrase, pattern,lock):
     base_name = os.path.basename(seq_loc)
     file_name = os.path.splitext(base_name)[0]
-    # print("Working on:", seq_loc)
     
     read_w_telo_mver = patternTRC_count(filepath=seq_loc, no_bp=1000, read_length=args.minSeqLength, telopattern=args.pattern, cutoff=args.cutoff, kmer=telo_phrase)
     
@@ -57,6 +62,14 @@ def process_file(args, seq_loc, telo_phrase, pattern):
 
         bound_res = bound_detect(filepath=seq_loc, read=read, pattern_telo=pattern, windowSize=args.windowSize, tail=tail, cut_length=telo_phrase,
                                  slide=args.slide, trimfirst=args.trimfirst, plot_yes_no=args.plot, maxlengthtelo=args.maxlengthtelo)
+        # print("telomere length of")
+        # print(bound_res)
+
+        with lock:
+            with open('temp_result.csv', mode='a', newline='') as file:
+                writer = csv.writer(file)
+                writer.writerow([file_name, telo_phrase, bound_res])
+
         bound_all_detected.append((file_name, telo_phrase, bound_res))
         
         if args.plot:
@@ -74,6 +87,15 @@ def process_file(args, seq_loc, telo_phrase, pattern):
     return bound_all_detected
 
 def analysis_run(args):
+    manager = Manager()
+    bound_all_detected = manager.list()
+    # lock = multiprocessing.Lock()
+
+    # for writing results temporarily 
+    with open('temp_result.csv', mode='w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(['file_number', 'phrase', 'telo_length'])
+        
     print("Begin running")
     telo_phrases = args.telophrase
     bound_all_detected = []
@@ -99,8 +121,10 @@ def analysis_run(args):
             filenames.append(args.inputDir)
 
         print("begin processing reads")
-        with Pool(processes=num_cores) as pool: 
-            results = pool.starmap(process_file, [(args, seq_loc, telo_phrase, pattern) for seq_loc in filenames])
+        with Manager() as manager:
+            lock = manager.Lock()
+            with Pool(processes=num_cores) as pool: 
+                results = pool.starmap(process_file, [(args, seq_loc, telo_phrase, pattern,lock) for seq_loc in filenames])
 
         print("start writing results")
         for result in results:
@@ -127,7 +151,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Command line input handling for run_analysis function')
     parser.add_argument('--inputDir', type=str, help='Path to the input folder directory', required=True)
     parser.add_argument('--outputDir', type=str, help='Path to the output folder directory', required=True)
-    parser.add_argument('--pattern', type=str, help='Telomere pattern, in Mver, AAACCG', required=True)
+    parser.add_argument('--pattern', type=str, help='Telomere pattern, in human, TTAGGG', required=True)
     parser.add_argument('--minSeqLength', type=int, help='Minimum of long read sequence, default = 9kbp', default=9000)
     parser.add_argument('--rawcountpattern', action='store_true', help='Print raw count of number of times see that pattern in each window')
     parser.add_argument('--telophrase', nargs='+', type=int, help=' Step 1 - Length of telomere cut, can be 4 or 5 or so on', default=4)

@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=test_col0  # Job name
+#SBATCH --job-name=test_col0_%j  # Job name
 #SBATCH --partition=jychoi     # Partition Name (Required)
 #SBATCH --ntasks=4              # Run on a single CPU
 #SBATCH --mem=10gb               # Job memory request
@@ -10,11 +10,12 @@
 # activate environment 
 source /topsicle/bin/activate
 
+# initial directories and patterns
 input_dir=/topsicle/topsicle_demo/data_col0_teloreg_chr
 output_dir=/topsicle/topsicle_demo/result_all
 telo_pattern=CCCTAAA
 
-# main.py run
+# running main.py
 
 # Output: telolengths_all.csv for telomere in all reads 
 # and additional: mean window plots, .csv files of raw count of each kmer pattern

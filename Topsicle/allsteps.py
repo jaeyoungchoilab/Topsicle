@@ -1,7 +1,8 @@
-# BoundTeloNano
+# Topsicle
 # input: fasta, fa.gz, fastq.gz, or fastq files
 # step 1: calculate Telomere-like Repeat Count (TRC) to identify read start / end has telomere 
 # Step 2: telomere length identified through mean values change of all telomere-like through window sliding 
+# Also have visualizations (density plot of mean window change)
 
 import sys
 import os
@@ -15,20 +16,22 @@ import Bio
 from Bio import SeqIO 
 from Bio.SeqIO.QualityIO import FastqGeneralIterator
 
-# # optimization 
+# # optimization, use when checking the performance
 # import cProfile
 # import pstats
 # import io
 
-# cp
+# algo packages 
 import ruptures as rpt
 import re
-import seaborn as sns
-import matplotlib.pyplot as plt
 
+# logging 
 import logging
 logging.basicConfig(level=logging.ERROR)
 
+# plotting
+import seaborn as sns
+import matplotlib.pyplot as plt
 colors = sns.color_palette("colorblind",n_colors=30)
 sns.set_style("whitegrid", {'grid.color': 'grey', 'grid.linestyle': '--'})
 
@@ -50,7 +53,6 @@ def check_file_type(filepath):
     except Exception as e:
         logging.error(f"Error checking file type: {e}")
         return 0
-
 
 # step 1: will that read have telomere?
 
@@ -124,9 +126,11 @@ def patterns_to_search (telopattern, cut_length):
 
     return pattern_all
 
-
 def unzip_file(filepath):
-    """Read sequences from a FASTQ or FASTA file (compressed or uncompressed)."""
+    """
+    Read sequences from a FASTQ or FASTA file (compressed or uncompressed)
+    yield sequence content 
+    """
     if not isinstance(filepath, str):
         logging.error("Input must be a string representing the file path.")
         return None
@@ -143,28 +147,7 @@ def unzip_file(filepath):
                 yield sequence
     except Exception as e:
         logging.error(f"Error parsing file: {e}")
-
         #sys.exit("there is problem with input in", filepath, " Terminate.")
-
-# def ids_of_read (filepath, read_length): 
-#     all_ids = [] # get all ids of that file 
-#     # read in the file when it is fastq or fasta 
-#     if type(filepath) == str and check_file_type(filepath) == 'fastq': 
-#         with gzip.open(filepath, "rt") as handle:
-#             sequences = SeqIO.parse(handle, "fastq")  # read in file, and loop over each row in the file
-#             for seq in sequences:
-#                 if len(seq.seq) > read_length: 
-#                     all_ids.append(seq.id)
-#     if type(filepath) == str and check_file_type(filepath) == 'fasta': 
-#         with gzip.open(filepath, "rt") as handle:
-#             sequences = SeqIO.parse(handle, "fastq")  # read in file, and loop over each row in the file
-#             for seq in sequences:
-#                 if len(seq.seq) > read_length: 
-#                     all_ids.append(seq.id)
-#     if type(filepath)!= str or check_file_type(filepath) == None:
-#         print("can only process 1 read at a time")
-#         return None
-#     return all_ids 
 
 # step 1: count TRC 
 def patternTRC_count(filepath, telopattern, read_length=0, kmer=4, no_bp=1000, cutoff=0.5):
@@ -223,6 +206,7 @@ def patternTRC_count(filepath, telopattern, read_length=0, kmer=4, no_bp=1000, c
 def seq_cut_windows(s, window_size, step):
     """
     Generate overlapping windows of a given size from a sequence along with their start and end indices.
+    
     seq: The input sequence (can be a list, string, etc.)
     window_size: The size of each window
     step: The number of elements to slide between windows (default is 1)
