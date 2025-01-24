@@ -83,11 +83,11 @@ python3 overview_plot.py \
 
 **Descriptive plot** (of first 30 reads in chromosome 1): 
 
-![Descriptive plot](Topsicle_demo/result_all/descriptive_plot_1.png)
+![Descriptive plot](Topsicle_demo/result_justone/descriptive_plot_1.png)
 
 **Heatmap:**
 
-![Heatmap](Topsicle_demo/result_all/heatmap_1.png)
+![Heatmap](Topsicle_demo/result_justone/heatmap_1.png)
 
 
 ### 2.2: Telomere length finding - main.py
@@ -95,8 +95,8 @@ Output a .csv file containing read ID and telomere length of each read for all t
 
 The script can be run from the command line as below, as an example of using all flags, which will output:
 - a [.csv file](Topsicle_demo/telolengths_all.csv) with file number, IDs of reads in that file, and telomere length (default, always output this)
-- [plots](Topsicle_demo/result_all/plot_4_1.png) of mean window changes and boundary points for each read tail, either start or end tail or both (flag --plot).
-- a [.csv file](Topsicle_demo/result_all/rawcount_4_1.csv) of rawcount to know what specific patterns contribute to the mean window changes (flag --rawcountpattern)
+- [plots](Topsicle_demo/result_justone/plot_4_1.png) of mean window changes and boundary points for each read tail, either start or end tail or both (flag --plot).
+- a [.csv file](Topsicle_demo/result_justone/rawcount_4_1.csv) of rawcount to know what specific patterns contribute to the mean window changes (flag --rawcountpattern)
 
 ```bash
 python3 main.py \
@@ -116,7 +116,7 @@ python3 main.py \
 
 **Mean window change plot** of one read in chromosome 1:
 
-![Mean window](Topsicle_demo/result_all/plot_4_1.png)
+![Mean window](Topsicle_demo/result_justone/plot_4_1.png)
 
 
 ### 2.3: Flags and explanations: 
