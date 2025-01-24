@@ -51,12 +51,12 @@ Make sure that we installed dependents in the **requirements.txt** files, but ma
 To mannually install those packages instead of using requirement file:
 
 ``` 
-biopython==1.75
-cython
+biopython>=1.75
+cython >=0.29.21 # install cython so we can install ruptures 
 matplotlib==3.3.4
 matplotlib-inline==0.1.6
-numpy==1.19.5
-pandas==2.2.0
+numpy==1.22.4
+pandas>=2.2.0
 ruptures==1.1.9
 seaborn==0.11.2
 ```
