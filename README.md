@@ -43,7 +43,7 @@ python3 main.py -h
 
 ### 1.2. Install requirements 
 ``` bash
-pip install -e .
+pip install -r requirements.txt
 ```
 
 Make sure that we installed dependents in the **requirements.txt** files, but maybe need to install cython manually.
@@ -66,7 +66,7 @@ Topsicle was developed in Python 3.6, but also passed tests in Python versions 3
 
 Using Topsicle, you can have an overview of where are telomere patterns within the sequence with [overview_plot.py](#21-descriptive-plots---overview_plotpy), or jump right into the main analysis to get telomere lengths in reads using [main.py](#22-telomere-length-finding---mainpy).  
 
-The full directory with code and results are in [Topsicle_demo](Topsicle_demo). After running it, it will return a .csv file (telolength_all.csv) for all telomere length of reads in the input, a temp_result.csv file writing the result in real time in case the analysis sudden stop (usually when the file is more than 3MB) descriptive plots, heatmaps and mean window change visualizations.
+The full directory with code and results are in [Topsicle_demo](Topsicle_demo). After running it, it will return a .csv file (telolength_all.csv) for all telomere length of reads in the input (Topsicle will write the result to this .csv file in real time), descriptive plots, heatmaps and mean window change visualizations.
 
 ### 2.1: Descriptive plots - overview_plot.py
 This code will output overview plot of locations of telomere pattern (or snippet of telomere pattern) in the sequence and heatmap. Run the code as below:
@@ -147,6 +147,8 @@ python3 main.py \
                         point detected, boolean, presence=True
 ```
 
+Note: Because we only want to have a brief understanding of how Topsicle works, hence, the [Topsicle_demo](Topsicle_demo) just contains A thaliana Col-0 reads that are aligned to chromosome one 3-prime of reference genome, with one result from each analysis (descriptive plot,... - see the folder for more details). We should note that when running Topsicle, it might return more files than just 5 files as in the Demo folder. 
+
 ### 2.4: Brief explanation of Topsicle workflow 
 1. We have an initial pattern that we want to look for (for example, the telomere pattern of Arabidopsis thaliana Col-0 strand is "CCCTAAA"). Since this desired pattern has 7 base pairs (7-bp), and long read sequence methods (Oxford Nanopore Technologies, PacBio HiFi,...) can have random sequencing errors, identifying a k-mer (a subset) of that 7-bp pattern will be less specificity than finding whole 7-bp. Pocky generates phrases of that strand to the length we want, for example 4-bp or 5-bp from 7-bp (--telophrase). Let's call them "k-mer patterns". 
 2. [Optional step 0](#21-descriptive-plots---overview_plotpy): Overview descriptive plot to see if input read has telomere or not by marking location of telomere pattern found in that read. This step can also get heatmap for general observation of tandem repeat we can expect to see and interpret if the analysis goes wrong at any point.
@@ -158,7 +160,7 @@ python3 main.py \
 
 ### 3.1. The code runs but no output
 1. Check pattern
-The pattern input should be the pattern at 5 prime of the read. For example, in Col-0 A.thaliana, this pattern should be 'CCCTAAA' (telomere pattern found at 5 prime), not 'TTTAGGG' (telomere pattern found at 3 prime). 
+The pattern input is recommended to be the pattern at 5 prime of the read. For example, in Col-0 A.thaliana, this pattern should be 'CCCTAAA' (telomere pattern found at 5 prime), not 'TTTAGGG' (telomere pattern found at 3 prime). This is to prevent any unwanted results 
 
 2. Check flags and input 
 Sometimes, input can be missing or in wrong format, and the code will not have any output then. Missing flag can be a reason for not being able to run as well.
@@ -168,8 +170,8 @@ Sometimes, input can be missing or in wrong format, and the code will not have a
 2. Double check the memory allowance 
 
 ### 3.3: Not enough resources
-This issue usually appears when running whole genome analysis but use less than 8 CPU cores in 24 hours for testing file that is more than 5GB (observations based on testing trials on KU HPC)
-1. It is recommended to have more resources allocate - maybe more CPU, more time or more other resources. If possible, breaking down the file into several 1GB files and submit several jobs can also help. 
-2. If the analysis keeps cancelled after several attempts and we do not need whole genome analysis, consider using temp_result.csv files instead, since it checks an amount of reads already.
+This issue usually appears when running whole genome analysis but use less than 6 cores in 24 hours for testing file that is more than 5GB and/or more than 1 million reads (observations based on testing trials on KU HPC)
+1. It is recommended to have more resources allocate - maybe more core, more time or other resources. If possible, breaking down the file into several 1GB and/or 0.2 millions reads files, then submit several jobs and put them together can also help. 
+2. If the analysis keeps cancelled after several attempts and we do not need whole genome analysis, please keep in mind that the telolength_all.csv might not contain every reads with telomere and their length, since the analysis was stopped. 
 
 

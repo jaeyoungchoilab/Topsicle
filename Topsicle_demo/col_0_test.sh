@@ -11,9 +11,9 @@
 source /topsicle/bin/activate
 
 # initial directories and patterns
-input_dir=/topsicle/topsicle_demo/data_col0_teloreg_chr
-output_dir=/topsicle/topsicle_demo/result_all
-telo_pattern=CCCTAAA
+input_dir=/topsicle/topsicle_demo/data_col0_teloreg_chr   # can input the file or the directory
+output_dir=/topsicle/topsicle_demo/result_all             # need to specific the output directory
+telo_pattern=CCCTAAA                                      # telomere pattern                    
 
 # running main.py
 
@@ -44,4 +44,5 @@ python3 overview_plot.py \
   --telophrase 4 \
   --recfindingpattern
 
-# then, sbatch col_0_test.sh in the terminal
+# then, put sbatch col_0_test.sh in the terminal
+# output will be in the output_dir directory

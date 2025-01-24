@@ -62,13 +62,13 @@ def process_file(args, seq_loc, telo_phrase, pattern,lock):
 
         bound_res = bound_detect(filepath=seq_loc, read=read, pattern_telo=pattern, windowSize=args.windowSize, tail=tail, cut_length=telo_phrase,
                                  slide=args.slide, trimfirst=args.trimfirst, plot_yes_no=args.plot, maxlengthtelo=args.maxlengthtelo)
-        # print("telomere length of")
-        # print(bound_res)
 
+
+        readID, telolen = bound_res[0]
         with lock:
-            with open('temp_result.csv', mode='a', newline='') as file:
+            with open('telolengths_all.csv', mode='a', newline='') as file:
                 writer = csv.writer(file)
-                writer.writerow([file_name, telo_phrase, bound_res])
+                writer.writerow([file_name, telo_phrase, readID,telolen])
 
         bound_all_detected.append((file_name, telo_phrase, bound_res))
         
@@ -89,14 +89,11 @@ def process_file(args, seq_loc, telo_phrase, pattern,lock):
 def analysis_run(args):
     manager = Manager()
     bound_all_detected = manager.list()
-    # lock = multiprocessing.Lock()
 
-    # for writing results temporarily 
-    with open('temp_result.csv', mode='w', newline='') as file:
+    with open('telolengths_all.csv', mode='w', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow(['file_number', 'phrase', 'telo_length'])
+        writer.writerow(['file_number', 'phrase', "readID", 'telo_length'])
         
-    print("Begin running")
     telo_phrases = args.telophrase
     bound_all_detected = []
 
@@ -126,23 +123,11 @@ def analysis_run(args):
             with Pool(processes=num_cores) as pool: 
                 results = pool.starmap(process_file, [(args, seq_loc, telo_phrase, pattern,lock) for seq_loc in filenames])
 
-        print("start writing results")
-        for result in results:
-            bound_all_detected.extend(result)
+        print("finished processing all reads")
 
-    flat_data = []
-    for record in bound_all_detected:
-        file_name = record[0]
-        phrases = record[1]
-        nested_data = record[2]
-
-        for sub_record in nested_data:
-            flat_data.append([file_name] + [phrases] + sub_record)
-
-    bound_all_detected_df = pd.DataFrame(flat_data, columns=['file_number', 'phrase', 'readID', 'telo_length'])
-    bound_all_detected_df.to_csv(f"{args.outputDir}/telolengths_all.csv")
     print(f"output: {args.outputDir}/telolengths_all.csv")
-    return bound_all_detected_df
+    print("")
+    return print("finished all analysis, check output")
 
 version_number = "1.0.0"
 Topsicle_output_prefix = "Topsicle"
