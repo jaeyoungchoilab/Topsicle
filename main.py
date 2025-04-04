@@ -1,4 +1,4 @@
-# This script is used to run the Topsicle analysis on a set of fastq or fasta files.
+# This script is used to run the Topsicle analysis on a set of fastq or fasta files, return telomere length. Main code.
 
 import sys
 import os
@@ -6,7 +6,6 @@ import gzip
 import numpy as np
 import pandas as pd
 from Bio import SeqIO 
-# os.environ['MPLCONFIGDIR'] = os.path.join(os.path.dirname(__file__), 'config')
 
 #for parallel 
 import multiprocessing
@@ -20,14 +19,8 @@ import matplotlib.pyplot as plt
 colors = sns.color_palette("colorblind",n_colors=30) 
 sns.set_style("whitegrid", {'grid.color': 'grey', 'grid.linestyle': '--'})
 
-import csv # useful in case slurm ran out of time 
+import csv 
 
-# for validate performance 
-# import cProfile
-# import pstats
-# import io
-
-# Add project root to sys.path 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 # import our package here 
 from Topsicle.allsteps import *
@@ -56,17 +49,16 @@ def process_file(args, seq_loc, telo_phrase, pattern,lock):
 
     bound_all_detected = []
     image_num = 1
-    for read in read_ID_w_telo_mver:
-        tail = read_ID_w_telo_mver_tail.get(read, None)
-        print("step 2 on:", read)
-
-        bound_res = bound_detect(filepath=seq_loc, read=read, pattern_telo=pattern, windowSize=args.windowSize, tail=tail, cut_length=telo_phrase,
-                                 slide=args.slide, trimfirst=args.trimfirst, plot_yes_no=args.plot, maxlengthtelo=args.maxlengthtelo)
-
-
+    # in case wanting to check a specific read only 
+    if args.read_check:
+        tail = read_ID_w_telo_mver_tail.get(args.read_check, None)
+        print("step 2 on:", args.read_check)
+        bound_res = bound_detect(filepath=seq_loc, read=args.read_check, pattern_telo=pattern, windowSize=args.windowSize, tail=tail, cut_length=telo_phrase,
+                                 slide=args.slide, trimfirst=args.trimfirst, plot_yes_no=args.plot, maxlengthtelo=args.maxlengthtelo,plotcp_range=args.rangecp)
+        
         readID, telolen = bound_res[0]
-        with lock:
-            with open('telolengths_all.csv', mode='a', newline='') as file:
+
+        with open(f'{args.outputDir}/telolengths_all.csv', mode='a', newline='') as file:
                 writer = csv.writer(file)
                 writer.writerow([file_name, telo_phrase, readID,telolen])
 
@@ -82,15 +74,44 @@ def process_file(args, seq_loc, telo_phrase, pattern,lock):
             if args.rawcountpattern:
                 allrawcount.to_csv(f"{args.outputDir}/rawcount_{telo_phrase}_{image_num}.csv")
 
-        image_num += 1
+    # check all reads, no specifying read
+    else:   
+        for read in read_ID_w_telo_mver:
+            tail = read_ID_w_telo_mver_tail.get(read, None)
+            print("step 2 on:", read)
+
+            bound_res = bound_detect(filepath=seq_loc, read=read, pattern_telo=pattern, windowSize=args.windowSize, tail=tail, cut_length=telo_phrase,
+                                    slide=args.slide, trimfirst=args.trimfirst, plot_yes_no=args.plot, maxlengthtelo=args.maxlengthtelo,plotcp_range=args.rangecp)
+
+
+            readID, telolen = bound_res[0]
+            with lock:
+                with open(f'{args.outputDir}/telolengths_all.csv', mode='a', newline='') as file:
+                    writer = csv.writer(file)
+                    writer.writerow([file_name, telo_phrase, readID,telolen])
+
+            bound_all_detected.append((file_name, telo_phrase, bound_res))
+            
+            if args.plot:
+                plt.savefig(f"{args.outputDir}/plot_{telo_phrase}_{image_num}.png", format='png', dpi=300)
+                plt.close()
+
+            if args.rawcountpattern:
+                allrawcount = rawCountPattern(filepath=seq_loc, read=read, pattern_telo=pattern, windowSize=args.windowSize, maxlengthtelo=args.maxlengthtelo,
+                                            slide=args.slide, trimfirst=args.trimfirst, cut_length=telo_phrase, tail=tail, minSeqLength=args.minSeqLength, plot_raw=False)
+                if args.rawcountpattern:
+                    allrawcount.to_csv(f"{args.outputDir}/rawcount_{telo_phrase}_{image_num}.csv")
+
+            image_num += 1
 
     return bound_all_detected
 
 def analysis_run(args):
     manager = Manager()
     bound_all_detected = manager.list()
+    os.makedirs(args.outputDir, exist_ok=True)  #make sure we have output directory
 
-    with open('telolengths_all.csv', mode='w', newline='') as file:
+    with open(f'{args.outputDir}/telolengths_all.csv', mode='w', newline='') as file:
         writer = csv.writer(file)
         writer.writerow(['file_number', 'phrase', "readID", 'telo_length'])
         
@@ -146,20 +167,8 @@ if __name__ == "__main__":
     parser.add_argument('--trimfirst', type=int, help='Step 2 - Trimming off first number of base pair in case of adapter', default=100)
     parser.add_argument('--maxlengthtelo', type=int, help='Step 2 - Longest value can be for telomere or sequence', default=20000)
     parser.add_argument('--plot', action='store_true', help='Step 2 - Plot of changes in mean window and change point detected, boolean, presence=True')
+    parser.add_argument('--rangecp', type=int, help='optional, set range of changepoint plot for visualization purpose, default is maxlengthtelo')
+    parser.add_argument('--read_check', type=str, help='optional, to get telomere of a specific read')
 
     args = parser.parse_args()
     analysis_run(args)
-
-    # for checking performance
-    # pr = cProfile.Profile()
-    # pr.enable()
-
-    # # Code to profile
-    # analysis_run(args)
-    # pr.disable()
-
-    # # Print profiling results
-    # s = io.StringIO()
-    # ps = pstats.Stats(pr, stream=s).sort_stats('cumulative')
-    # ps.print_stats()
-    # print(s.getvalue())

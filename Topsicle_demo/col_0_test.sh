@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name=test_col0_%j  # Job name
-#SBATCH --partition=jychoi     # Partition Name (Required)
+#SBATCH --partition=jychoi     # Partition Name 
 #SBATCH --ntasks=4              # Run on a single CPU
 #SBATCH --mem=10gb               # Job memory request
 #SBATCH --time=36:00:00       # Time limit hrs:min:sec
@@ -21,8 +21,8 @@ telo_pattern=CCCTAAA                                      # telomere pattern
 # and additional: mean window plots, .csv files of raw count of each kmer pattern
 
 python3 main.py \
-  --inputDir "$input_dir" \
-  --outputDir "$output_dir" \
+  --inputDir $input_dir \
+  --outputDir $output_dir \
   --pattern $telo_pattern \
   --minSeqLength 9000 \
   --telophrase 4 \
@@ -42,7 +42,8 @@ python3 overview_plot.py \
   --pattern $telo_pattern \
   --minSeqLength 9000 \
   --telophrase 4 \
-  --recfindingpattern
+  --recfindingpattern \
+  --rawcount
 
-# then, put sbatch col_0_test.sh in the terminal
+# then, submit sbatch col_0_test.sh 
 # output will be in the output_dir directory

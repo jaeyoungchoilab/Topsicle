@@ -6,7 +6,6 @@
 
 import sys
 import os
-# Add project root to sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import gzip
@@ -15,11 +14,6 @@ import pandas as pd
 import Bio
 from Bio import SeqIO 
 from Bio.SeqIO.QualityIO import FastqGeneralIterator
-
-# # optimization, use when checking the performance
-# import cProfile
-# import pstats
-# import io
 
 # algo packages 
 import ruptures as rpt
@@ -61,8 +55,10 @@ def check_file_type(filepath):
 ## such as 3bp or 4bp patterns
 def pattern_scramble_telo (pattern, cut_length):
     '''
+    pattern_scramble_telo: get the unique cuts from the initial sequence, along with pattern_to_search
     pattern: string, input desired patterns to scramble
     cut_length: list, length wanna cut, recommend having 3 and 4 cut 
+    output: list of unique k-mers
     '''
     # double the pattern since telomere sequences are repetitive sequences of pattern
     unique_cuts = set()
@@ -86,6 +82,7 @@ def pattern_scramble_telo (pattern, cut_length):
 
 def patterns_to_search (telopattern, cut_length):
     '''
+    patterns_to_search: get the unique k-mers from the initial sequence, along with pattern_scramble_telo
     telopattern: str or list of str, pattern of telomere
     cut_length: 4-bp from 6-bp pattern 
     '''
@@ -129,6 +126,7 @@ def patterns_to_search (telopattern, cut_length):
 def unzip_file(filepath):
     """
     Read sequences from a FASTQ or FASTA file (compressed or uncompressed)
+    input: the path of the file
     yield sequence content 
     """
     if not isinstance(filepath, str):
@@ -152,12 +150,14 @@ def unzip_file(filepath):
 # step 1: count TRC 
 def patternTRC_count(filepath, telopattern, read_length=0, kmer=4, no_bp=1000, cutoff=0.5):
     '''
+    Find the telomere-like repeat count (TRC) in the first and last no_bp base pairs of the sequence
     filepath: str, location of file, can be either fastqz.gz or fasta, just 1 file at the time 
     no_bp: int, number of first bp to find 
     telopattern: str or list of str, pattern of telomere
     read_length: minimum length require for the sequence (filter out too short sequences)
     kmer: length of scanning pattern divided by chunk when we wanna have flexibility, default = 4
     cutoff: cutoff for mean_window value to be cutoff point for telomere boundary, default = 0.5
+    yeild: list of reads with patterns and TRC value. Won't filter out reads at this step
     '''
     find_match = []  # empty list to store found pattern, ratio, start/end 
     raw_count = []
@@ -223,8 +223,9 @@ def seq_cut_windows(s, window_size, step):
         windows.append((start, s[start:end]))
     return windows  # Return indices and window
     
-def bound_detect(filepath, read, pattern_telo, windowSize, slide, trimfirst, maxlengthtelo, cut_length, tail=None, plot_yes_no=None):
+def bound_detect(filepath, read, pattern_telo, windowSize, slide, trimfirst, maxlengthtelo, cut_length, tail=None, plot_yes_no=None,plotcp_range=None):
     '''
+    Find telomere-subtelomere boundary point in the sequence by using mean window value change and changepoint algo 
     filepath: location of fasta file
     read: read name, but just 1 read at the time 
     pattern: pattern wanna find, maybe ACCG. multiple patterns at each time
@@ -312,18 +313,21 @@ def bound_detect(filepath, read, pattern_telo, windowSize, slide, trimfirst, max
             if all_cps:
                 telo_boundary_point = int(all_cps[0])
                 if plot_yes_no:
-                    plt.figure(figsize=(12, 4), dpi=300)
-                    plt.plot(x, y, marker='o', color='#C59434', linestyle='-', linewidth=2)
-                    plt.axvline(x=telo_boundary_point, color='#342A1F', linestyle='--', label=f'x = boundary point: {telo_boundary_point}')
+                    plt.figure(figsize=(7.5, 3), dpi=300)
+                    plt.plot(x, y, color='#000000', linestyle='-', linewidth=2)
+                    plt.axvline(x=telo_boundary_point, color='#FF2C2C', linewidth=2, linestyle='--', label=f'x = boundary point: {telo_boundary_point}')
                     plt.title(f'mean window + boundary point of {seq.id}')
                     plt.xlabel('base pair (bp)')
                     plt.ylabel('mean window value')
-                    plt.xlim(0, maxlengthtelo)
+                    if plotcp_range:
+                        plt.xlim(0,plotcp_range)
+                    else:
+                        plt.xlim(0, maxlengthtelo)
                     plt.tight_layout()
                     plt.grid(True)
 
                 if telo_boundary_point <= maxlengthtelo and telo_boundary_point != 0:
-                    boundary.append([read, telo_boundary_point + trimfirst])
+                    boundary.append([read, telo_boundary_point]) #save the boundary point
                 else:
                     boundary.append([read, 0])
 
@@ -353,6 +357,7 @@ def plot_patterns(seq, patterns, read_ids, added_labels, ax, direction):
 
 def rawCountPattern(filepath, read, pattern_telo, windowSize, slide, trimfirst, cut_length, minSeqLength, maxlengthtelo, tail=None, plot_raw=False):
     '''
+    To get raw count of telomere-like repeat in the sequence
     filepath: location of fasta file
     read: read name, but just 1 read at the time 
     pattern: pattern wanna find, maybe ACCG. multiple patterns at each time

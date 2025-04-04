@@ -23,9 +23,6 @@ colors = sns.color_palette("colorblind",n_colors=30)
 
 sns.set_style("whitegrid", {'grid.color': 'grey', 'grid.linestyle': '--'})
 
-version_number = "1.0.0"
-BoundTeloNano_output_prefix = "BoundTeloNano"
-
 # check file type before processing 
 def check_file_type(filepath):
     open_func = gzip.open if filepath.endswith(".gz") else open
@@ -45,7 +42,7 @@ def check_file_type(filepath):
 
 
 def unzip_file(filepath):
-    """Read sequences from a FASTQ or FASTA file (compressed or uncompressed)."""
+    """Read sequences from a FASTQ or FASTA file (can be compressed or uncompressed)."""
     if not isinstance(filepath, str):
         logging.error("Input must be a string representing the file path.")
         return None
@@ -123,9 +120,7 @@ def descriptive_plot(filepath, pattern, minSeqLength):
         # Add legend to differentiate patterns, but make it reverse 
         handles, labels = ax.get_legend_handles_labels()
     
-        # handles.reverse()
-        # labels.reverse()
-        # Set the legend with reversed order
+        
         labels=labels_pre
         ax.legend(handles, labels, title="Pattern")  
 
@@ -134,8 +129,8 @@ def descriptive_plot(filepath, pattern, minSeqLength):
         ax.set_yticklabels([read_ids[i] for i in range(len(read_ids))])
 
         # get the grid 
-        ax.xaxis.grid(True)  # Enable horizontal grid lines
-        ax.yaxis.grid(True)  # Disable vertical grid lines
+        ax.xaxis.grid(True)  
+        ax.yaxis.grid(True)  
         plt.tight_layout()
 
         if iin > 40:
@@ -174,7 +169,7 @@ def pattern_scramble_telo (pattern, cut_length):
 def patterns_to_search (telopattern, cut_length):
     '''
     telopattern: str or list of str, pattern of telomere
-    cut_length: 4-bp from 6-bp pattern 
+    cut_length: 4-bp from 6-bp pattern, or from 5-bp from 7-bp pattern, etc.
     '''
     if "|" in telopattern and type(telopattern) == str: 
         ## origin pattern: 'AACC|ACCG',...
@@ -215,12 +210,17 @@ def patterns_to_search (telopattern, cut_length):
 
 def patterns_vs_match_heatmap (filepath, telopattern,telophrase,minSeqLength):
     '''
-    fastqz_loc: string, full path location of sequence, but just 1 path at a time 
+    Create a heatmap to visualize the patterns vs matches in the sequences
+    filepath: the path of input file
+    telopattern: str or list of str, pattern of telomere
+    telophrase: int, length of telomere cut, can be 4 or 5 or so on
+    minSeqLength: int, minimum sequence length to consider for plotting
+    output: a heatmap showing the patterns vs matches in the sequences
+
     '''
     # Split by '/' to get the last component
     base_name = filepath.split('/')[-1]
     file_name = base_name.split('.')[0]
-    sns.set_style("whitegrid", {'grid.color': 'grey', 'grid.linestyle': '--'})
     trans_table = str.maketrans('ACGT', 'TGCA')
     
     # Apply the translation to the sequence
@@ -243,7 +243,7 @@ def patterns_vs_match_heatmap (filepath, telopattern,telophrase,minSeqLength):
             seq_2 = str(read.seq[::-1][:minSeqLength]).upper() # reverse comp)
             trans_table = str.maketrans('ACGT', 'TGCA')
     
-            # Apply the translation to the sequence
+            #translation for 2nd strand 
             seq_2 = seq_2.translate(trans_table)
 
             # Loop through each pattern
@@ -267,22 +267,23 @@ def patterns_vs_match_heatmap (filepath, telopattern,telophrase,minSeqLength):
     
     matches_df = pd.DataFrame(matches, columns=["Pattern", "Match","read id"]) 
     matches_2_df = pd.DataFrame(matches_2_list, columns=["Pattern", "Match","read id"]) 
-    y_axis_order=list(y_axis_order)
+    # y_axis_order=list(y_axis_order)
     matches_df['Match'] = pd.Categorical(matches_df['Match'],y_axis_order)
     matches_2_df['Match'] = pd.Categorical(matches_2_df['Match'],y_axis_order)
 
-    fig, ax = plt.subplots(1, 2, figsize=(10, 8))  # 1 row, 2 columns
+    #getting both reverse and forward strand together
+    allstrands = pd.concat([matches_df, matches_2_df], ignore_index=True)
+
+    fig, ax = plt.subplots(figsize=(5, 8)) 
     y_axis_order=list(y_axis_order)
     # print('matches_df',matches_df)
 
     # matches_2_df = matches_2_df.loc[y_axis_order]
-    sns.histplot(data=matches_df, ax=ax[0],
-                x="Pattern", y="Match",cbar=True, cbar_kws=dict(shrink=.75)).set_title("forward strand")
-    ax[0].tick_params(axis='x', rotation=45)
-    sns.histplot(data=matches_2_df,ax=ax[1],
-                x="Pattern", y="Match",cbar=True, cbar_kws=dict(shrink=.75)).set_title("reverse strand")
-    ax[1].tick_params(axis='x', rotation=45)
+    sns.histplot(data=allstrands, x="Pattern", y="Match",cbar=True, cbar_kws=dict(shrink=.75))
+    ax.tick_params(axis='x', rotation=45)
+   
+   
     plt.suptitle(f"{telophrase}-bp patterns and matches from reads in \n {file_name}")
     plt.tight_layout()
 
-    return matches_df
+    return allstrands
