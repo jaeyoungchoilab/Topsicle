@@ -1,0 +1,15 @@
+# log file when running Topsicle demo in the terminal directly
+[2025-06-12 09:20:24] Number of allocated cores: 24
+[2025-06-12 09:20:24] Output will be here: /kuhpc/work/jychoi/l233n428/Topsicle/Topsicle_demo/result_all/telolengths_all.csv
+[2025-06-12 09:20:24] No telophrase provided, use kmer: [5]
+---------------------
+[2025-06-12 09:20:24] patterns to search: ['AAACC', 'AACCC', 'ACCCT', 'CCCTA', 'CCTAA', 'CTAAA', 'TAAAC', 'TTTGG', 'TTGGG', 'TGGGA', 'GGGAT', 'GGATT', 'GATTT', 'ATTTG']
+[2025-06-12 09:20:24] begin processing reads
+[2025-06-12 09:20:25] Temporary fasta file with TRC more than 0.4: /kuhpc/work/jychoi/l233n428/Topsicle/Topsicle_demo/result_all/Col-0-6909_GWHBDNP00000001.1_nano_right.fastq_trc_over_0.4.fastq
+[2025-06-12 09:20:34] finished processing all reads
+---------------------
+[2025-06-12 09:20:34] k-mer: 5, with TRC >= 0.4, median telomere length is 2110.00 bp
+[2025-06-12 09:20:34] asymptotic TRC, or recommended cutoff: 0.643
+[2025-06-12 09:20:34] Median telomere length for reads with TRC cutoff >= 0.643: 2095.00 bp
+[2025-06-12 09:20:34] All telomere found, have a nice day.
+Elapsed time(s): 9.23 seconds
