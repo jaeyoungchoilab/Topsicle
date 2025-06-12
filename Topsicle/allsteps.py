@@ -22,6 +22,7 @@ import re
 # logging 
 import logging
 logging.basicConfig(level=logging.ERROR)
+import warnings
 
 # plotting
 import seaborn as sns
@@ -462,3 +463,16 @@ def rawCountPattern(filepath, read, pattern_telo, windowSize, slide, trimfirst, 
 
     return pd.DataFrame(rawcount_all, columns=['tail', 'position', 'pattern', 'count'])
 
+# automate get TRC values and its corresponding telomere length
+def fit_quadratic_and_find_vertex(trc_list, telo_length_list):
+    """
+    Fit a quadratic curve to TRC and telomere length data,
+    and find the TRC value where the derivative is zero (vertex).
+    """
+    trc_arr = np.array(trc_list)
+    telo_arr = np.array(telo_length_list)
+    coeffs = np.polyfit(trc_arr, telo_arr, 2)
+    a, b, c = coeffs
+    vertex_x = -b / (2 * a)
+    vertex_y = a * vertex_x**2 + b * vertex_x + c
+    return vertex_x, vertex_y, coeffs

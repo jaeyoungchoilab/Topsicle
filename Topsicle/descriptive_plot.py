@@ -92,7 +92,7 @@ def descriptive_plot(filepath, pattern, minSeqLength):
         if len(read.seq) > minSeqLength:   # length of sequence > minSeqLength, which default - 9kbp 
             iin+=1
             
-            seq = str(read.seq[:minSeqLength]).upper()   # no need to plot all, just to 9kbp is enough to observe
+            seq = str(read.seq[:minSeqLength]).upper()   # no need to plot all, just to some first kbp is enough to observe
             read_ids.append(read.name)
             seq_2 = str(read.seq[::-1][:minSeqLength]).upper() # comp strand (reverse of reverse comp)
             
@@ -273,14 +273,24 @@ def patterns_vs_match_heatmap (filepath, telopattern,telophrase,minSeqLength):
 
     #getting both reverse and forward strand together
     allstrands = pd.concat([matches_df, matches_2_df], ignore_index=True)
+    
+    match_order = sorted(allstrands["Match"].dropna().unique())
+    allstrands["Match"] = pd.Categorical(allstrands["Match"], categories=match_order, ordered=True)
+
 
     fig, ax = plt.subplots(figsize=(5, 8)) 
     y_axis_order=list(y_axis_order)
     # print('matches_df',matches_df)
 
     # matches_2_df = matches_2_df.loc[y_axis_order]
-    sns.histplot(data=allstrands, x="Pattern", y="Match",cbar=True, cbar_kws=dict(shrink=.75))
-    ax.tick_params(axis='x', rotation=45)
+    hist_data = pd.crosstab(allstrands["Match"], allstrands["Pattern"])
+    ax = sns.heatmap(hist_data, annot=True, fmt="d", cmap="Blues", cbar_kws=dict(shrink=0.75))
+    ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha='right')
+    ax.set_ylabel("Match")
+    ax.set_xlabel("Pattern")
+
+    # sns.histplot(data=allstrands, x="Pattern", y="Match",cbar=True, cbar_kws=dict(shrink=.75))
+    # ax.tick_params(axis='x', rotation=45)
    
    
     plt.suptitle(f"{telophrase}-bp patterns and matches from reads in \n {file_name}")

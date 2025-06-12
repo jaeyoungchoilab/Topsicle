@@ -12,6 +12,9 @@ from itertools import chain
 import argparse
 import seaborn as sns
 import matplotlib.pyplot as plt
+import time
+import datetime
+from collections import defaultdict
 
 # Add project root to sys.path - so will not get error in importing code
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -22,6 +25,11 @@ sns.set_style("whitegrid", {'grid.color': 'grey', 'grid.linestyle': '--'})
 
 version_number = "1.0.0"
 Topsicle_output_prefix = "Topsicle"
+
+def tprint(*args, **kwargs):
+    msg = " ".join(str(a) for a in args)
+    now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print(f"[{now}]", msg)
 
 def plot_running(args):
     # begin plotting
@@ -37,6 +45,14 @@ def plot_running(args):
                 filenames.append(os.path.join(root, filename))
     else:
         filenames.append(args.inputDir)
+
+    # in case user not provide telomere phrase
+    if args.telophrase is None:
+        telo_phrases= [len(args.pattern) - 2]
+        tprint(f"No telophrase provided, use kmer: {telo_phrases}")
+    else:
+        telo_phrases = args.telophrase if isinstance(args.telophrase, list) else [args.telophrase]
+    
             
     print("Loaded all data, start plotting")
 
@@ -54,7 +70,7 @@ def plot_running(args):
     # heatmap plotting
     if args.recfindingpattern:
         for i, seq_loc in enumerate(filenames, start=1):
-            for phrase in args.telophrase:
+            for phrase in telo_phrases:
                 print(f"Heatmap on {seq_loc}")
                 heatmap = patterns_vs_match_heatmap(seq_loc, args.pattern, phrase, args.minSeqLength)
                 plt.savefig(f"{args.outputDir}/heatmap_{i}.png", format='png', dpi=300)
@@ -79,7 +95,7 @@ if __name__ == "__main__":
     parser.add_argument('--outputDir', type=str, help='Path to the output folder directory')
     parser.add_argument('--pattern', type=str, help='Telomere pattern, in Mver, AAACCG')
     parser.add_argument('--minSeqLength', type=int, help='Minimum of long read sequence, default = 9kbp', default=9000)
-    parser.add_argument('--telophrase', nargs='+', type=int, help='Step 1 - Length of telomere cut, can be 4 or 5 or so on', default=4)
+    parser.add_argument('--telophrase', nargs='+', type=int, help='Step 1 - Length of telomere cut, can be 4 or 5 or so on')
     parser.add_argument('--recfindingpattern', action='store_true', help='Boolean, use this to plot the heatmap of patterns vs match')
     parser.add_argument('--rawcount', action='store_true', help='Boolean, save raw count results to CSV for flexibility of plotting')
 
