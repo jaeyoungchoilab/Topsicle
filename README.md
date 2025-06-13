@@ -4,12 +4,10 @@ This package is used to identify telomere boundary in long read sequencing (ONT 
 
 Topsicle gets inputs in format as either fasta (or fasta.gz) or fastq (or fastq.gz), along with other parameters about telomere patterns (see section 2), then output with the length of each read within that input file in a .csv file and supplemental plots. 
 
-## 0. Table of contents
-
-## 0. Table of contents
+## Table of contents
 
 * [1. Getting started](#1-getting-started)
-* [2. Usage](#2-usage)
+* [2. Running Topsicle](#2-usage)
   * [2.1. Identify telomere length - main.py](#21-identify-telomere-length---mainpy)
     * [2.1.1 Main output, telolengths_all.csv explanation](#211-main-output-telolengths_allcsv-explanation)
   * [2.2. Descriptive plots - overview_plot.py (Optional)](#22-descriptive-plots---overview_plotpy-optional)
@@ -65,13 +63,22 @@ seaborn>=0.11.2
 ```
 Topsicle was developed in Python 3.6, but also passed tests in Python versions 3.10 and 3.12. 
 
-## 2. Usage 
+## 2. Running Topsicle 
 
 Using Topsicle, you can have an overview of where are telomere patterns within the sequence with [overview_plot.py](#22-descriptive-plots---overview_plotpy), or jump right into the **main analysis** to get telomere lengths in reads using [main.py](#21-telomere-length-finding---mainpy).  
 
 The full directory with code and results are in [Topsicle_demo](Topsicle_demo). After running it, it will return a .csv file (telolength_all.csv) for all telomere length of reads in the input (Topsicle will write the result to this .csv file in real time), descriptive plots, heatmaps and mean window change visualizations.
 
-### 2.1: Identify telomere length - **main.py**
+### 2.1.1: Quick example of running Topsicle
+
+```bash
+python3 main.py \
+  --inputDir $input_dir \
+  --outputDir $output_dir \
+  --pattern $telo_pattern
+```
+
+### 2.1.2: Detailed explanation of running Topsicle
 Output a .csv file containing read ID and telomere length of each read for all the reads in that inputDir which passed basic filtering (>9kbp).
 
 The script can be run from the command line as below, as an example of using all flags, which will output:
@@ -98,21 +105,12 @@ python3 main.py \
   --rawcountpattern
 ```
 
-However if user only need telomere length of raw reads from ONT or PacBio, providing below required flags is enough, which include specifying directory of raw reads, output and telomere pattern:
-
-```bash
-python3 main.py \
-  --inputDir $input_dir \
-  --outputDir $output_dir \
-  --pattern $telo_pattern
-```
-
 **Mean window change plot** of one read in chromosome 1:
 
 ![Mean window](Topsicle_demo/result_justone/plot_4_1.png)
 
 
-#### 2.1.1 Main output, [telolengths_all.csv](/kuhpc/work/jychoi/l233n428/Topsicle/Topsicle_demo/telolengths_all.csv) explanation
+#### 2.1.3 Main output, [telolengths_all.csv](/kuhpc/work/jychoi/l233n428/Topsicle/Topsicle_demo/telolengths_all.csv) explanation
 This is the most important output of this program, and it will be updated in real time while Topsicle is running. 
 - file_number: name of the input file (if supple direct one file) or files in the directory (if supply a directory with files)
 - phrase: k-mer value. By default, if the telomere pattern is 6-bp long, Topsicle will find 4-mer patterns (phrase = 4)
@@ -128,7 +126,7 @@ Also, there will be the [log file](/kuhpc/work/jychoi/l233n428/Topsicle/Topsicle
 If there is no line "**All telomere found, have a nice day**", that means Topsicle did not examine all possible reads in the raw data. User can rerun the process or pick up previous run by supplying *Temporary fasta file*, as in line 8 of the demo log file with its path, and please supply more resources. Also see section [3. Troubleshooting](#3-troubleshooting). 
 
 
-### 2.2: Descriptive plots - overview_plot.py (Optional)
+### 2.2: Plotting and visualization - overview_plot.py (Optional)
 This code will output overview plot of locations of telomere pattern (or snippet of telomere pattern) in the sequence and heatmap. Run the code as below:
 
 ```bash
