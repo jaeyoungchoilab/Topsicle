@@ -89,16 +89,8 @@ python3 main.py \
 ```
 
 ### 2.1.2: Detailed explanation of running Topsicle
-Output a .csv file containing read ID and telomere length of each read for all the reads in that inputDir which passed basic filtering (>9kbp).
 
-The script can be run from the command line as below, as an example of using all flags, which will output:
-- a [.csv file](Topsicle_demo/telolengths_all.csv) with file number, IDs of reads in that file, and telomere length (default, always output this)
-- a [.fastq file](/kuhpc/work/jychoi/l233n428/Topsicle/Topsicle_demo/result_justone/Col-0-6909_GWHBDNP00000001.1_nano_right.fastq_trc_over_0.4.fastq), which is subset of initial dataset with reads that is likely to contain telomere because of their TRC is more than 0.4, or whatever value that user specified (ones with the abundance of telomere pattern at the first 1000 bp is more than 40% of the read or whatever value)
-
-Some additional output, based on flags: 
-- [plots](Topsicle_demo/result_justone/plot_4_1.png) of mean window changes and boundary points for each read tail, either start or end tail or both (flag **--plot**).
-- a [.csv file](Topsicle_demo/result_justone/rawcount_4_1.csv) of rawcount to know what specific patterns contribute to the mean window changes (flag **--rawcountpattern**)
-
+Detailed example run:
 ```bash
 python3 main.py \
   --inputDir $input_dir \
@@ -115,12 +107,50 @@ python3 main.py \
   --rawcountpattern
 ```
 
-**Mean window change plot** of one read in chromosome 1:
+Explanations of options from **main.py**: 
+```
+options:
+  -h, --help            show this help message and exit
+  --inputDir INPUTDIR   Required, Path to the input folder directory
+  --outputDir OUTPUTDIR
+                        Required, Path to the output folder directory
+  --pattern PATTERN     Required, Telomere pattern, in human, TTAGGG
+  --minSeqLength MINSEQLENGTH
+                        Minimum of long read sequence, default = 9kbp
+  --rawcountpattern     Print raw count of number of times see that pattern in each window
+  --telophrase TELOPHRASE [TELOPHRASE ...]
+                        Step 1 - Length of telomere cut, can be 4 or 5 or so on
+  --cutoff CUTOFF [CUTOFF ...]
+                        Step 1 - Cutoff of TRC value to have telomere, can be 0.4, 0.5 or so on
+  --windowSize WINDOWSIZE
+                        Step 2 - Window size for sliding
+  --slide SLIDE         Step 2 - Window sliding step, default is initial telomere length
+  --trimfirst TRIMFIRST
+                        Step 2 - Trimming off first number of base pair in case of adapter
+  --maxlengthtelo MAXLENGTHTELO
+                        Step 2 - Longest value can be for telomere or sequence
+  --plot                Step 2 - Plot of changes in mean window and change point detected, boolean, presence=True
+  --rangecp RANGECP     optional, set range of changepoint plot for visualization purpose, default is maxlengthtelo
+  --read_check READ_CHECK
+                        optional, to get telomere of a specific read
+```
+
+Example **mean window change plot** of one read in chromosome 1:
 
 ![Mean window](Topsicle_demo/result_justone/plot_4_1.png)
 
 
 ### 2.1.3 Explanation of output
+Output a .csv file containing read ID and telomere length of each read for all the reads in that inputDir which passed basic filtering (>9kbp).
+
+The script can be run from the command line as below, as an example of using all flags, which will output:
+- a [.csv file](Topsicle_demo/telolengths_all.csv) with file number, IDs of reads in that file, and telomere length (default, always output this)
+- a [.fastq file](/kuhpc/work/jychoi/l233n428/Topsicle/Topsicle_demo/result_justone/Col-0-6909_GWHBDNP00000001.1_nano_right.fastq_trc_over_0.4.fastq), which is subset of initial dataset with reads that is likely to contain telomere because of their TRC is more than 0.4, or whatever value that user specified (ones with the abundance of telomere pattern at the first 1000 bp is more than 40% of the read or whatever value)
+
+Some additional output, based on flags: 
+- [plots](Topsicle_demo/result_justone/plot_4_1.png) of mean window changes and boundary points for each read tail, either start or end tail or both (flag **--plot**).
+- a [.csv file](Topsicle_demo/result_justone/rawcount_4_1.csv) of rawcount to know what specific patterns contribute to the mean window changes (flag **--rawcountpattern**)
+  
 Example output: [telolengths_all.csv](Topsicle_demo/telolengths_all.csv) 
 
 This is the most important output of this program, and it will be updated in real time while Topsicle is running. 
@@ -162,34 +192,6 @@ python3 overview_plot.py \
 
 
 ### 2.3: Flags and explanations: 
-
-For main purpose - telomere length identification (**main.py**): 
-```
-options:
-  -h, --help            show this help message and exit
-  --inputDir INPUTDIR   Required, Path to the input folder directory
-  --outputDir OUTPUTDIR
-                        Required, Path to the output folder directory
-  --pattern PATTERN     Required, Telomere pattern, in human, TTAGGG
-  --minSeqLength MINSEQLENGTH
-                        Minimum of long read sequence, default = 9kbp
-  --rawcountpattern     Print raw count of number of times see that pattern in each window
-  --telophrase TELOPHRASE [TELOPHRASE ...]
-                        Step 1 - Length of telomere cut, can be 4 or 5 or so on
-  --cutoff CUTOFF [CUTOFF ...]
-                        Step 1 - Cutoff of TRC value to have telomere, can be 0.4, 0.5 or so on
-  --windowSize WINDOWSIZE
-                        Step 2 - Window size for sliding
-  --slide SLIDE         Step 2 - Window sliding step, default is initial telomere length
-  --trimfirst TRIMFIRST
-                        Step 2 - Trimming off first number of base pair in case of adapter
-  --maxlengthtelo MAXLENGTHTELO
-                        Step 2 - Longest value can be for telomere or sequence
-  --plot                Step 2 - Plot of changes in mean window and change point detected, boolean, presence=True
-  --rangecp RANGECP     optional, set range of changepoint plot for visualization purpose, default is maxlengthtelo
-  --read_check READ_CHECK
-                        optional, to get telomere of a specific read
-```
 
 Note: Because we only want to have a brief understanding of how Topsicle works, hence, the [Topsicle_demo](Topsicle_demo) just contains A. thaliana Col-0 reads that are aligned to chromosome 1R of reference genome (TAIR10, GCF_000001735.4), with one result from each analysis (see the Demo folder for more details). We should note that when running Topsicle, it might return more files than just 5 files as in the Demo folder. 
 
