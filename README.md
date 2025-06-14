@@ -72,11 +72,20 @@ The full directory with code and results are in [Topsicle_demo](Topsicle_demo). 
 
 ### 2.1.1: Quick example of running Topsicle
 
+General example:
 ```bash
 python3 main.py \
   --inputDir $input_dir \
   --outputDir $output_dir \
   --pattern $telo_pattern
+```
+
+Demo file example:
+```bash
+python3 main.py \
+  --inputDir Topsicle_demo/data_col0_teloreg_chr \
+  --outputDir Topsicle_demo/result_justone \
+  --pattern AAACCCT
 ```
 
 ### 2.1.2: Detailed explanation of running Topsicle
