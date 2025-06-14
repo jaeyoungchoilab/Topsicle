@@ -12,8 +12,7 @@ Topsicle gets inputs in format as either fasta (or fasta.gz) or fastq (or fastq.
   * [2.1.2 Detailed explanation of running Topsicle](#212-detailed-explanation-of-running-topsicle)
   * [2.1.3 Explanation of output](#213-explanation-of-output)
   * [2.2. Plotting and visualization (Optional)](#22-plotting-and-visualization-optional)
-  * [2.3. Flags and explanations](#23-flags-and-explanations)
-  * [2.4. Topsicle workflow](#24-topsicle-workflow)
+  * [2.3. Topsicle workflow](#24-topsicle-workflow)
 * [3. Troubleshooting](#3-troubleshooting)
 
 ## 1. Getting started
@@ -87,6 +86,7 @@ python3 main.py \
   --outputDir Topsicle_demo/result_justone \
   --pattern AAACCCT
 ```
+Note: Because we only want to have a brief understanding of how Topsicle works, hence, the [Topsicle_demo](Topsicle_demo) just contains A. thaliana Col-0 reads that are aligned to chromosome 1R of reference genome (TAIR10, GCF_000001735.4), with one result from each analysis (see the Demo folder for more details). We should note that when running Topsicle, it might return more files than just 5 files as in the Demo folder. 
 
 ### 2.1.2: Detailed explanation of running Topsicle
 
@@ -191,11 +191,7 @@ python3 overview_plot.py \
 ![Heatmap](Topsicle_demo/result_justone/heatmap_1.png)
 
 
-### 2.3: Flags and explanations: 
-
-Note: Because we only want to have a brief understanding of how Topsicle works, hence, the [Topsicle_demo](Topsicle_demo) just contains A. thaliana Col-0 reads that are aligned to chromosome 1R of reference genome (TAIR10, GCF_000001735.4), with one result from each analysis (see the Demo folder for more details). We should note that when running Topsicle, it might return more files than just 5 files as in the Demo folder. 
-
-### 2.4: Topsicle workflow 
+### 2.3: Topsicle workflow 
 A more detailed version is in the publication. 
 1. We have an telomere pattern that we want to identify length (for example, the telomere pattern of Arabidopsis thaliana Col-0 strand is "CCCTAAA"). Since initial telomere pattern has 7 base pairs (7-bp) and long read sequence methods (Oxford Nanopore Technologies, PacBio HiFi,...) can have  sequencing errors, identifying a k-mer (a subset) of that 7-bp pattern will be less specificity than finding whole 7-bp. Topsicle generates k-mer (or phrase, or subset) of that pattern, for example 4-bp or 5-bp from 7-bp (--telophrase). Let's call them "k-mer patterns" and perform analysis on them. 
 
