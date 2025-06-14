@@ -112,7 +112,7 @@ python3 main.py \
 
 
 ### 2.1.3 Explanation of output
-Example output: [telolengths_all.csv](/kuhpc/work/jychoi/l233n428/Topsicle/Topsicle_demo/telolengths_all.csv) 
+Example output: [telolengths_all.csv](https://github.com/jaeyoungchoilab/Topsicle/blob/main/Topsicle_demo/telolengths_all.csv) 
 
 This is the most important output of this program, and it will be updated in real time while Topsicle is running. 
 - file_number: name of the input file (if supple direct one file) or files in the directory (if supply a directory with files)
