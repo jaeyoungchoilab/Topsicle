@@ -12,7 +12,7 @@ Topsicle gets inputs in format as either fasta (or fasta.gz) or fastq (or fastq.
   * [2.1.2 Detailed explanation of running Topsicle](#212-detailed-explanation-of-running-topsicle)
   * [2.1.3 Explanation of output](#213-explanation-of-output)
   * [2.2. Plotting and visualization (Optional)](#22-plotting-and-visualization-optional)
-  * [2.3. Topsicle workflow](#24-topsicle-workflow)
+  * [2.3. Topsicle workflow](#23-topsicle-workflow)
 * [3. Troubleshooting](#3-troubleshooting)
 
 ## 1. Getting started
@@ -86,7 +86,7 @@ python3 main.py \
   --outputDir Topsicle_demo/result_justone \
   --pattern AAACCCT
 ```
-Note: Because we only want to have a brief understanding of how Topsicle works, hence, the [Topsicle_demo](Topsicle_demo) just contains A. thaliana Col-0 reads that are aligned to chromosome 1R of reference genome (TAIR10, GCF_000001735.4), with one result from each analysis (see the Demo folder for more details). We should note that when running Topsicle, it might return more files than just 5 files as in the Demo folder. 
+[Topsicle_demo](Topsicle_demo) contains A. thaliana Col-0 reads from chromosome 1R reference genome (TAIR10, GCF_000001735.4). Note when running Topsicle on your own data, it might return more files than just 5 files as in the Demo folder. 
 
 ### 2.1.2: Detailed explanation of running Topsicle
 
@@ -135,26 +135,28 @@ options:
                         optional, to get telomere of a specific read
 ```
 
-Example **mean window change plot** of one read in chromosome 1:
+Example **mean window change plot** of a sequencing read:
 
 ![Mean window](Topsicle_demo/result_justone/plot_4_1.png)
 
 
 ### 2.1.3 Explanation of output
-Output a .csv file containing read ID and telomere length of each read for all the reads in that inputDir which passed basic filtering (>9kbp).
+Topsicle will output a .csv file containing read ID and telomere length of all reads in the inputDir that passed filtering.
 
-The script can be run from the command line as below, as an example of using all flags, which will output:
-- a [.csv file](Topsicle_demo/telolengths_all.csv) with file number, IDs of reads in that file, and telomere length (default, always output this)
-- a [.fastq file](/kuhpc/work/jychoi/l233n428/Topsicle/Topsicle_demo/result_justone/Col-0-6909_GWHBDNP00000001.1_nano_right.fastq_trc_over_0.4.fastq), which is subset of initial dataset with reads that is likely to contain telomere because of their TRC is more than 0.4, or whatever value that user specified (ones with the abundance of telomere pattern at the first 1000 bp is more than 40% of the read or whatever value)
+#### Quick summary
+Main outputs of interest.
+- [$output.csv file](Topsicle_demo/telolengths_all.csv): Output file with file number, IDs of reads in that file, and telomere length (default, always output this)
+- [$output.fastq file](Topsicle_demo/result_justone/Col-0-6909_GWHBDNP00000001.1_nano_right.fastq_trc_over_0.4.fastq): Reads that passed TRC threshold
 
-Some additional output, based on flags: 
-- [plots](Topsicle_demo/result_justone/plot_4_1.png) of mean window changes and boundary points for each read tail, either start or end tail or both (flag **--plot**).
-- a [.csv file](Topsicle_demo/result_justone/rawcount_4_1.csv) of rawcount to know what specific patterns contribute to the mean window changes (flag **--rawcountpattern**)
-  
+Additional possible outputs based on flags: 
+- [plots](Topsicle_demo/result_justone/plot_4_1.png): Plot showing telomere repeat mean count by window and the telomere-subtelomere boundary point for each read (flag **--plot**).
+- [$rawcount.csv file](Topsicle_demo/result_justone/rawcount_4_1.csv): Raw count output used for calculating the sliding window and mean telomere repeat count (flag **--rawcountpattern**)
+
+#### Detailed summary
 Example output: [telolengths_all.csv](Topsicle_demo/telolengths_all.csv) 
 
-This is the most important output of this program, and it will be updated in real time while Topsicle is running. 
-- file_number: name of the input file (if supple direct one file) or files in the directory (if supply a directory with files)
+Main output of Topsicle and updates in real time while Topsicle is running. 
+- file_number: name of the input file(s) in the directory
 - phrase: k-mer value. By default, if the telomere pattern is 6-bp long, Topsicle will find 4-mer patterns (phrase = 4)
 - trc: Telomere repeat count value of that read, which seperate between reads with and without telomere (see the publication). Higher trc value, more confident the algorithm can be in the identified telomere length, but this value is just for reference and prediction of optimized TRC value. 
 - readID: ID of read has telomere
@@ -163,7 +165,8 @@ This is the most important output of this program, and it will be updated in rea
 Also, there will be the [log file](Topsicle_demo/log_topsicle_demo.log), which contains:
 - Information of resources used: number of cores, time, location of output
 - Real time update
-- Hard-choice TRC cutoff and median of telomere length if using this cutoff (line 11), predicted TRC cutoff (line 12) and corresponding median telomere length (line 13). 
+- Hard-choice TRC cutoff and median of telomere length if using this cutoff (line 11)
+- In case a predicted TRC cutoff is desired, the asymptotic TRC cutoff (line 12) and corresponding median telomere length (line 13) can also be found. 
 
 If there is no line "**All telomere found, have a nice day**", that means Topsicle did not examine all possible reads in the raw data. User can rerun the process or pick up previous run by supplying *Temporary fasta file*, as in line 8 of the demo log file with its path, and please supply more resources. Also see section [3. Troubleshooting](#3-troubleshooting). 
 
@@ -182,11 +185,11 @@ python3 overview_plot.py \
   --rawcount
 ```
 
-**Descriptive plot** (of first 40 reads in chromosome 1): 
+**Descriptive plot** displaying telomere repeat counts in the first 40 reads: 
 
 ![Descriptive plot](Topsicle_demo/result_justone/descriptive_plot_1.png)
 
-**Heatmap:**
+**Heatmap** displaying telomere repeat count by k-mer:
 
 ![Heatmap](Topsicle_demo/result_justone/heatmap_1.png)
 
@@ -195,21 +198,22 @@ python3 overview_plot.py \
 A more detailed version is in the publication. 
 1. We have an telomere pattern that we want to identify length (for example, the telomere pattern of Arabidopsis thaliana Col-0 strand is "CCCTAAA"). Since initial telomere pattern has 7 base pairs (7-bp) and long read sequence methods (Oxford Nanopore Technologies, PacBio HiFi,...) can have  sequencing errors, identifying a k-mer (a subset) of that 7-bp pattern will be less specificity than finding whole 7-bp. Topsicle generates k-mer (or phrase, or subset) of that pattern, for example 4-bp or 5-bp from 7-bp (--telophrase). Let's call them "k-mer patterns" and perform analysis on them. 
 
-  Also a note, with this strategy, if user does not 100% sure of telomere pattern of a species, they can provide the most abundance pattern from tools such as Tandem Repeats Finder, tidk or by checking reads align to chromosome ends of reference genome, which are likely to have telomere. In short, Topsicle needs telomere pattern, but does not require to have too accurate ones. 
+Also a note, with this strategy, if user does not 100% sure of telomere pattern of a species, they can provide the most abundance pattern from tools such as Tandem Repeats Finder, tidk or by checking reads align to chromosome ends of reference genome, which are likely to have telomere. In short, Topsicle needs telomere pattern, but does not require to have too accurate ones. 
 
-  User can provide multiple telomere patterns by using the pipe ("|"), such as "AAACCCG|AAACCG", but this feature is not fully tested in this version yet. 
+User can provide multiple telomere patterns by using the pipe ("|"), such as "AAACCCG|AAACCG", but this feature is not fully tested in this version yet. 
 
-2. [Optional step 0](#21-descriptive-plots---overview_plotpy): This step provides an overview of the original sequence and what a good value for generating k-mers is.
+2. [Optional visualization step](#22-plotting-and-visualization-optional): This step provides an initial visual analysis of the input sequences.
 
-Overview descriptive plot is used to see if input read has telomere or not (initial pattern). It will return plots with location of telomere pattern found in that read. Heatmap can also be generated for observation of tandem repeats we can expect to have in the dataset. By default, it will return a description plot of positions of k-mer patterns for a read, and in addition, using -recfindingpattern option will generate a heatmap (k-mer profile) and let us know what k-mer from the telomere pattern is abundance and what errors are commonly found within this read. Along with the heatmap, the parameter -rawcount will extract the count of each k-mer and its match in case we want to know exact how many matches at each position. 
+This optional step is used to see if the input reads contains the telomere repeat. It will return plots with location of telomere pattern found in that read. Heatmap can also be generated for observation of tandem repeats we can expect to have in the dataset. By default, it will return a description plot of positions of k-mer patterns for a read, and in addition, using -recfindingpattern option will generate a heatmap (k-mer profile) and let us know what k-mer from the telomere pattern is abundance and what errors are commonly found within this read. Along with the heatmap, the parameter -rawcount will extract the count of each k-mer and its match in case we want to know exact how many matches at each position. 
 
 It is advised to run this supplemental function prior to running the main function to have the overview observations of species and its reads before finding telomere length.  
 
-3. [Step 1](#22-telomere-length-finding---mainpy): If that read has telomere, the first 1000bp if a read should also have telomere and its k-mers there. Checking first 1kbp will have the proportion of k-mer patterns (TRC value), and the read will be marked as having telomere if its TRC value is larger than the TRC cutoff value (--cutoff). 
-4. [Step 2](#22-telomere-length-finding---mainpy): After identifying potential read that has telomere, Topsicle finds how long is that telomere by sliding (--slide) through window (--windowSize) by specific length of window and sliding, measuring the mean of number of patterns found within that window, and returning the boundary point between telomere and non-telomere regions based on changepoint algorithm. 
+**Executing Topsicle**
+3. Step 1. TRC filering (executed by the program): If read is sequenced from the telomere the first 1000bp of that read should contain telomere repeat k-mers. The count of this initial telomere repeat k-mers (i.e. TRC statistics) will be used for filtering candidate telomere sequencing reads. Reads with larger than a threshold TRC value (--cutoff) will be analyzed for downstream. In case a threshold can't be determined Topsicle can calculate an automatic threshold using the asymptotic method (see manuscript for detail) and calculate the telomere length.
+4. Step 2: After identifying potential read that has telomere, Topsicle finds how long is that telomere by sliding (--slide) through window (--windowSize) and measuring the mean of number of patterns found within that window, and returning the boundary point between telomere and non-telomere regions based on changepoint algorithm. 
 5. Optional step 3: If we want to know what kmer-bp pattern is most found within a window (kmer has to smaller than initial length of telomere pattern), we use the flag --rawcountpattern to return a .csv file with position of window start, pattern, and number of pattern found in that window. 
 
-6. See 2.2.1 section for output explanations
+6. See [2.1.3 Explanation of output](#213-explanation-of-output) for output explanations
 
 ## 3. Troubleshooting
 
