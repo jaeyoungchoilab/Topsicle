@@ -209,11 +209,14 @@ This optional step is used to see if the input reads contains the telomere repea
 It is advised to run this supplemental function prior to running the main function to have the overview observations of species and its reads before finding telomere length.  
 
 **Executing Topsicle**
-3. Step 1. TRC filering (executed by the program): If read is sequenced from the telomere the first 1000bp of that read should contain telomere repeat k-mers. The count of this initial telomere repeat k-mers (i.e. TRC statistics) will be used for filtering candidate telomere sequencing reads. Reads with larger than a threshold TRC value (--cutoff) will be analyzed for downstream. In case a threshold can't be determined Topsicle can calculate an automatic threshold using the asymptotic method (see manuscript for detail) and calculate the telomere length.
-4. Step 2: After identifying potential read that has telomere, Topsicle finds how long is that telomere by sliding (--slide) through window (--windowSize) and measuring the mean of number of patterns found within that window, and returning the boundary point between telomere and non-telomere regions based on changepoint algorithm. 
+
+3. Step 1. TRC filering: If read is sequenced from the telomere the first 1000bp of that read should contain telomere repeat k-mers. The count of this initial telomere repeat k-mers (i.e. TRC statistics) will be used for filtering candidate telomere sequencing reads. Reads with larger than a threshold TRC value (--cutoff) will be analyzed for downstream. In case a threshold can't be determined Topsicle can calculate an automatic threshold using the asymptotic method (see manuscript for detail) and calculate the telomere length.
+
+4. Step 2. Telomere length calculation: After identifying potential read that has telomere, Topsicle finds how long is that telomere by sliding (--slide) through window (--windowSize) and measuring the mean of number of patterns found within that window, and returning the boundary point between telomere and non-telomere regions based on changepoint algorithm.
+
 5. Optional step 3: If we want to know what kmer-bp pattern is most found within a window (kmer has to smaller than initial length of telomere pattern), we use the flag --rawcountpattern to return a .csv file with position of window start, pattern, and number of pattern found in that window. 
 
-6. See [2.1.3 Explanation of output](#213-explanation-of-output) for output explanations
+7. See [2.1.3 Explanation of output](#213-explanation-of-output) for output explanations
 
 ## 3. Troubleshooting
 
