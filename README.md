@@ -1,3 +1,5 @@
+![TopsicleLogo](Topsicle/blob/main/Topsicle/TopsicleLogo.png)
+
 # Topsicle
 
 This package is used to identify telomere boundaries in long-read sequencing (ONT and PacBio). 
