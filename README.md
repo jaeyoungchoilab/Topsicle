@@ -1,4 +1,4 @@
-![TopsicleLogo](Topsicle/Topsicle/TopsicleLogo.png)
+![TopsicleLogo](Topsicle/TopsicleLogo.png)
 
 # Topsicle
 
