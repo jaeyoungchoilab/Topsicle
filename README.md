@@ -1,4 +1,4 @@
-![TopsicleLogo](Topsicle/blob/main/Topsicle/TopsicleLogo.png)
+![TopsicleLogo](Topsicle/Topsicle/TopsicleLogo.png)
 
 # Topsicle
 
