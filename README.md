@@ -111,12 +111,6 @@ python3 main.py --help
 ```
 to get the explanation of each parameter.
 
-Example **mean window change plot** of a sequencing read:
-
-![Mean window](Topsicle_demo/result_justone/plot_4_1.png)
-
-The red line indicate the estimated telomere-subtelomere boundary point.
-
 ### 2.1.3 Explanation of output
 Topsicle will output a .csv file containing the read ID and telomere length of all reads in the --inputDir that passed filtering.
 
@@ -127,6 +121,13 @@ Main outputs of interest.
 
 Additional possible outputs based on flags: 
 - [$read.png](Topsicle_demo/result_justone/plot_4_1.png): Plot showing mean telomere repeat count by window and the telomere-subtelomere boundary point for each read (flag **--plot**).
+- 
+Example **mean window change plot** of a sequencing read:
+
+![Mean window](Topsicle_demo/result_justone/plot_4_1.png)
+
+The red line indicate the estimated telomere-subtelomere boundary point.
+
 - [$read.csv](Topsicle_demo/result_justone/rawcount_4_1.csv): Raw count output used for calculating the sliding window and mean telomere repeat count (flag **--rawcountpattern**)
 
 #### Detailed summary
