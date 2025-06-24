@@ -1,5 +1,5 @@
 # log file when running Topsicle demo in the terminal directly
-[2025-06-12 09:20:24] Number of allocated cores: 24
+[2025-06-12 09:20:24] Specified number of cores are/is: 4
 [2025-06-12 09:20:24] Output will be here: /kuhpc/work/jychoi/l233n428/Topsicle/Topsicle_demo/result_all/telolengths_all.csv
 [2025-06-12 09:20:24] No telophrase provided, use kmer: [5]
 ---------------------

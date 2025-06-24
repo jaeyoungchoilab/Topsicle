@@ -38,15 +38,8 @@ def vprint(*args, **kwargs):
     if verbose:
         print(*args, **kwargs)
 
-#check number of cores 
-try:
-    num_cores = len(os.sched_getaffinity(0))
-    tprint(f"Number of allocated cores: {num_cores}")
-except AttributeError:
-    # Fallback for systems
-    tprint(f"Number of cores: {cpu_count()}")
-
 def process_file(args, seq_loc, telo_phrase, pattern,sliding_val,lock):
+    tprint("subsetting raw dataset based on TRC cutoff")
     base_name = os.path.basename(seq_loc)
     file_name = os.path.splitext(base_name)[0]
     min_cutoff = min(args.cutoff) if isinstance(args.cutoff, (list, tuple)) else args.cutoff
@@ -154,6 +147,17 @@ def analysis_run(args):
     manager = Manager()
     bound_all_detected = manager.list()
     os.makedirs(args.outputDir, exist_ok=True)  #make sure we have output directory
+
+    if args.threads is not None:
+        num_cores = args.threads
+        tprint(f"Specified number of cores are/is: {num_cores}")
+    else:
+        try:
+            num_cores = len(os.sched_getaffinity(0))
+            tprint(f"By default, Topsicle allocates nmber of cores: {num_cores}")
+        except AttributeError:
+            num_cores = cpu_count()
+            tprint(f"By default, Topsicle allocates number of cores: {num_cores}")
 
     output_csv = f'{args.outputDir}/telolengths_all.csv'
     tprint(f"Output will be here: {output_csv}")
@@ -272,21 +276,22 @@ Topsicle_output_prefix = "Topsicle"
 
 if __name__ == "__main__":
     start_time = time.time()
-    parser = argparse.ArgumentParser(description='Command line input handling for run_analysis function')
-    parser.add_argument('--inputDir', type=str, help='Required, Path to the input folder directory', required=True)
-    parser.add_argument('--outputDir', type=str, help='Required, Path to the output folder directory', required=True)
-    parser.add_argument('--pattern', type=str, help='Required, Telomere pattern, in human, TTAGGG', required=True)
-    parser.add_argument('--minSeqLength', type=int, help='Minimum of long read sequence, default = 9kbp', default=9000)
-    parser.add_argument('--rawcountpattern', action='store_true', help='Print raw count of number of times see that pattern in each window')
-    parser.add_argument('--telophrase', nargs='+', type=int, help=' Step 1 - Length of telomere cut, can be 4 or 5 or so on')
-    parser.add_argument('--cutoff',nargs='+', type=float, help='Step 1 - Cutoff of TRC value to have telomere, can be 0.4, 0.5 or so on', default=0.4)
-    parser.add_argument('--windowSize', type=int, help=' Step 2 - Window size for sliding', default=100)
-    parser.add_argument('--slide', type=int, help=' Step 2 - Window sliding step, default is initial telomere length', default=6)
-    parser.add_argument('--trimfirst', type=int, help='Step 2 - Trimming off first number of base pair in case of adapter', default=100)
-    parser.add_argument('--maxlengthtelo', type=int, help='Step 2 - Longest value can be for telomere or sequence', default=20000)
-    parser.add_argument('--plot', action='store_true', help='Step 2 - Plot of changes in mean window and change point detected, boolean, presence=True')
+    parser = argparse.ArgumentParser(description='Topsicle - Telomere length estimation from long reads', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('--inputDir', type=str, help='Required, Path to the input file or directory', required=True)
+    parser.add_argument('--outputDir', type=str, help='Required, Path to the output directory', required=True)
+    parser.add_argument('--pattern', type=str, help='Required, Telomere pattern, for example, human has TTAGGG', required=True)
+    parser.add_argument('--minSeqLength', type=int, help='Minimum length required for long read, default = 9kbp', default=9000)
+    parser.add_argument('--rawcountpattern', action='store_true', help='Output raw count of pattern abundance of each window')
+    parser.add_argument('--telophrase', nargs='+', type=int, help=' k-mer of telomere pattern, can be 4, 5,... ')
+    parser.add_argument('--cutoff',nargs='+', type=float, help='Threshold of TRC to be telomere, can be 0.4, 0.5,... ', default=0.4)
+    parser.add_argument('--windowSize', type=int, help='Sliding window size', default=100)
+    parser.add_argument('--slide', type=int, help=' Window sliding step, default is initial telomere length', default=6)
+    parser.add_argument('--trimfirst', type=int, help='Trimming off first number of base pair to prevent adapter', default=100)
+    parser.add_argument('--maxlengthtelo', type=int, help='Longest value can be for telomere or sequence', default=20000)
+    parser.add_argument('--plot', action='store_true', help='Plot of changes in mean window and change point detected, boolean, presence=True')
     parser.add_argument('--rangecp', type=int, help='optional, set range of changepoint plot for visualization purpose, default is maxlengthtelo')
     parser.add_argument('--read_check', type=str, help='optional, to get telomere of a specific read')
+    parser.add_argument('--threads', type=int, help='Number of CPU cores to use (by default, use all cores there)', default=None)
 
     args = parser.parse_args()
     
