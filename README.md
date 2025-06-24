@@ -111,6 +111,46 @@ python3 main.py --help
 ```
 to get the explanation of each parameter.
 
+```
+options:
+  -h, --help            show this help message and exit
+  --inputDir INPUTDIR   Required, Path to the input file or directory (default:
+                        None)
+  --outputDir OUTPUTDIR
+                        Required, Path to the output directory (default: None)
+  --pattern PATTERN     Required, Telomere pattern, for example, human has TTAGGG
+                        (default: None)
+  --minSeqLength MINSEQLENGTH
+                        Minimum length required for long read, default = 9kbp
+                        (default: 9000)
+  --rawcountpattern     Output raw count of pattern abundance of each window
+                        (default: False)
+  --telophrase TELOPHRASE [TELOPHRASE ...]
+                        k-mer of telomere pattern, can be 4, 5,... (default: None)
+  --cutoff CUTOFF [CUTOFF ...]
+                        Threshold of TRC to be telomere, can be 0.4, 0.5,...
+                        (default: 0.4)
+  --windowSize WINDOWSIZE
+                        Sliding window size (default: 100)
+  --slide SLIDE         Window sliding step, default is initial telomere length
+                        (default: 6)
+  --trimfirst TRIMFIRST
+                        Trimming off first number of base pair to prevent adapter
+                        (default: 100)
+  --maxlengthtelo MAXLENGTHTELO
+                        Longest value can be for telomere or sequence (default:
+                        20000)
+  --plot                Plot of changes in mean window and change point detected,
+                        boolean, presence=True (default: False)
+  --rangecp RANGECP     optional, set range of changepoint plot for visualization
+                        purpose, default is maxlengthtelo (default: None)
+  --read_check READ_CHECK
+                        optional, to get telomere of a specific read (default:
+                        None)
+  --threads THREADS     Number of CPU cores to use (by default, use all cores
+                        there) (default: None)
+```
+
 ### 2.1.3 Explanation of output
 Topsicle will output a .csv file containing the read ID and telomere length of all reads in the --inputDir that passed filtering.
 

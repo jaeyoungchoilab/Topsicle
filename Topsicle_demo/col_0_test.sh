@@ -26,7 +26,8 @@ python3 main.py \
   --outputDir $output_dir \
   --pattern $telo_pattern \
   --plot \
-  --rawcountpattern
+  --rawcountpattern \
+  --threads 4
 
 # overview_plot.py run 
 # output: heatmap of patterns and the matchs after it 
@@ -60,7 +61,8 @@ python3 overview_plot.py \
 #   --trimfirst 200 \
 #   --maxlengthtelo 20000 \
 #   --plot \
-#   --rawcountpattern
+#   --rawcountpattern \
+#   --threads 4
 
 # # overview_plot.py run 
 # # output: heatmap of patterns and the matchs after it 
