@@ -1,0 +1,28 @@
+[2025-06-27 17:43:12] inputDir: /kuhpc/work/jychoi/l233n428/Topsicle/Topsicle_demo/data_col0_teloreg_chr
+[2025-06-27 17:43:12] outputDir: result_all
+[2025-06-27 17:43:12] pattern: CCCTAAA
+[2025-06-27 17:43:12] minSeqLength: 9000
+[2025-06-27 17:43:12] rawcountpattern: False
+[2025-06-27 17:43:12] telophrase: None
+[2025-06-27 17:43:12] cutoff: 0.7
+[2025-06-27 17:43:12] windowSize: 100
+[2025-06-27 17:43:12] slide: 6
+[2025-06-27 17:43:12] trimfirst: 100
+[2025-06-27 17:43:12] maxlengthtelo: 20000
+[2025-06-27 17:43:12] plot: False
+[2025-06-27 17:43:12] rangecp: None
+[2025-06-27 17:43:12] read_check: None
+[2025-06-27 17:43:12] override: False
+[2025-06-27 17:43:12] threads: None
+[2025-06-27 17:43:12] Starting Topsicle analysis
+[2025-06-27 17:43:12] By default, Topsicle allocates nmber of cores: 24
+[2025-06-27 17:43:12] Output will be here: result_all/telolengths_all.csv
+[2025-06-27 17:43:12] No telophrase provided, use kmer: [5]
+[2025-06-27 17:43:12] patterns to search: ['AAACC', 'AACCC', 'ACCCT', 'CCCTA', 'CCTAA', 'CTAAA', 'TAAAC', 'TTTGG', 'TTGGG', 'TGGGA', 'GGGAT', 'GGATT', 'GATTT', 'ATTTG']
+[2025-06-27 17:43:12] begin processing reads
+[2025-06-27 17:43:12] Temporary fasta file with TRC more than 0.7: result_justone/Col-0-6909_GWHBDNP00000001.1_nano_right.fastq_trc_over_0.7.fastq
+[2025-06-27 17:43:14] finished processing all reads
+[2025-06-27 17:43:14] k-mer: 5, with TRC >= 0.7, median telomere length is 2110.00 bp
+[2025-06-27 17:43:14] asymptotic TRC, or recommended cutoff: 0.897
+[2025-06-27 17:43:14] Median telomere length for reads with TRC cutoff >= 0.897: 2050.00 bp
+[2025-06-27 17:43:14] All telomere found, have a nice day.

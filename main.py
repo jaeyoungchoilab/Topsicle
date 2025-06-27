@@ -28,10 +28,21 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 # import our package here 
 from Topsicle.allsteps import *
 
+def get_log_path(args):
+    # Use outputDir if available, else current directory
+    log_dir = getattr(args, 'outputDir', '.')
+    os.makedirs(log_dir, exist_ok=True)
+    return os.path.join(log_dir, "topsicle_run.log")
+
 def tprint(*args, **kwargs):
     msg = " ".join(str(a) for a in args)
     now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    print(f"[{now}]", msg)
+    line = f"[{now}] {msg}"
+    print(line)
+    # Write to log file if available
+    if hasattr(tprint, "logfile"):
+        with open(tprint.logfile, "a") as f:
+            f.write(line + "\n")
 
 verbose = False
 def vprint(*args, **kwargs):
@@ -144,6 +155,13 @@ def process_file(args, seq_loc, telo_phrase, pattern,sliding_val,lock):
     return bound_all_detected
 
 def analysis_run(args):
+    print("---- Topsicle run parameters ---")
+    for k, v in vars(args).items():
+        tprint(f"{k}: {v}")
+    print("---------------------")
+
+    tprint("Starting Topsicle analysis")
+
     manager = Manager()
     bound_all_detected = manager.list()
     os.makedirs(args.outputDir, exist_ok=True)  #make sure we have output directory
@@ -162,8 +180,12 @@ def analysis_run(args):
     output_csv = f'{args.outputDir}/telolengths_all.csv'
     tprint(f"Output will be here: {output_csv}")
     if os.path.exists(output_csv) and os.path.getsize(output_csv) > 0:
-        tprint(f"Output file {output_csv} already exists and is not empty. Exiting to avoid overwrite.")
-        sys.exit(1)   
+        if args.override:
+            tprint(f"Output file {output_csv} already exists and will be overridden becuz having --override flag.")
+            os.remove(output_csv)
+        else:
+            tprint(f"Output file {output_csv} already exists and is not empty. Exiting to avoid overwrite. Use --override to force overwrite.")
+            sys.exit(1)   
 
     if args.telophrase is None:
         telo_phrases= [len(args.pattern) - 2]
@@ -241,15 +263,29 @@ def analysis_run(args):
         telo_phrase_medians.append(phrase)
         median_telolen_list.append(median_telo)
         median_trc_list.append(median_trc)
+        # telling TRC distribution and print obs 
         tprint(f"k-mer: {phrase}, with TRC >= {inputtrc}, median telomere length is {median_telo:.2f} bp")
 
         if len(phrase_to_telo[phrase]) >= 3:
-            vertex_x, vertex_y, coeffs = fit_quadratic_and_find_vertex(phrase_to_trc[phrase], phrase_to_telo[phrase])
+            max_trc=max(phrase_to_trc[phrase])
+            plot_path = os.path.join(args.outputDir, f"quadfit_{phrase}mer_{args.pattern}.png")
+            vertex_x, vertex_y, coeffs = fit_quadratic_and_find_vertex(
+                phrase_to_trc[phrase], phrase_to_telo[phrase], 
+                inputtrc=inputtrc, median_trc=median_trc, save_path=plot_path)
+            
+            #vertex_x, vertex_y, coeffs = fit_quadratic_and_find_vertex(phrase_to_trc[phrase], phrase_to_telo[phrase])
 
-            if vertex_x > median_trc:
+            if vertex_x > 1.0:
+                tprint(f"Asymptotic TRC {vertex_x:.3f} is greater than 1.0, which is not expected. See plot.")
+                tprint(f"Using median TRC value ({median_trc:.3f}) as asymptotic TRC instead.")
                 vertex_x = median_trc
-            if vertex_x < inputtrc:
-                vertex_x = inputtrc
+            if vertex_x < 0.4:
+                tprint("Quadratic fit suggests asymptotic TRC less than 0.4. See plot with fit line")
+                if max_trc < 0.4:
+                    tprint(f"Maximum TRC value in data is {max_trc:.3f}, which is less than 0.4, indicating low confidence in telomere detection.")
+                if vertex_x < inputtrc:
+                    tprint(f"Asymptotic TRC {vertex_x:.3f} is less than input cutoff {inputtrc:.3f}. Topsicle declares input TRC (={inputtrc}) as asymptotic TRC.")
+                    vertex_x = inputtrc
             if vertex_x == inputtrc:
                 vertex_x = inputtrc
             
@@ -277,13 +313,14 @@ Topsicle_output_prefix = "Topsicle"
 if __name__ == "__main__":
     start_time = time.time()
     parser = argparse.ArgumentParser(description='Topsicle - Telomere length estimation from long reads', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--inputDir', type=str, help='Required, Path to the input file or directory', required=True)
-    parser.add_argument('--outputDir', type=str, help='Required, Path to the output directory', required=True)
+
+    parser.add_argument('--inputDir','-i', type=str, help='Required, Path to the input file or directory', required=True)
+    parser.add_argument('--outputDir','-o', type=str, help='Required, Path to the output directory', required=True)
     parser.add_argument('--pattern', type=str, help='Required, Telomere pattern, for example, human has TTAGGG', required=True)
     parser.add_argument('--minSeqLength', type=int, help='Minimum length required for long read, default = 9kbp', default=9000)
     parser.add_argument('--rawcountpattern', action='store_true', help='Output raw count of pattern abundance of each window')
     parser.add_argument('--telophrase', nargs='+', type=int, help=' k-mer of telomere pattern, can be 4, 5,... ')
-    parser.add_argument('--cutoff',nargs='+', type=float, help='Threshold of TRC to be telomere, can be 0.4, 0.5,... ', default=0.4)
+    parser.add_argument('--cutoff',nargs='+', type=float, help='Threshold of TRC to be telomere, can be 0.4, 0.5,... ', default=0.7)
     parser.add_argument('--windowSize', type=int, help='Sliding window size', default=100)
     parser.add_argument('--slide', type=int, help=' Window sliding step, default is initial telomere length', default=6)
     parser.add_argument('--trimfirst', type=int, help='Trimming off first number of base pair to prevent adapter', default=100)
@@ -291,9 +328,11 @@ if __name__ == "__main__":
     parser.add_argument('--plot', action='store_true', help='Plot of changes in mean window and change point detected, boolean, presence=True')
     parser.add_argument('--rangecp', type=int, help='optional, set range of changepoint plot for visualization purpose, default is maxlengthtelo')
     parser.add_argument('--read_check', type=str, help='optional, to get telomere of a specific read')
-    parser.add_argument('--threads', type=int, help='Number of CPU cores to use (by default, use all cores there)', default=None)
+    parser.add_argument('--override','-ov', action='store_true', help='Override output file')
+    parser.add_argument('--threads','-t', type=int, help='Number of CPU cores to use (by default, use all cores there)', default=None)
 
     args = parser.parse_args()
+    tprint.logfile = get_log_path(args)
     
     analysis_run(args)
     end_time = time.time()
