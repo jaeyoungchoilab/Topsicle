@@ -49,8 +49,8 @@ def vprint(*args, **kwargs):
     if verbose:
         print(*args, **kwargs)
 
-
 def process_file(args, seq_loc, telo_phrase, pattern,sliding_val,lock):
+    tprint("subsetting raw dataset based on TRC cutoff")
     base_name = os.path.basename(seq_loc)
     file_name = os.path.splitext(base_name)[0]
     min_cutoff = min(args.cutoff) if isinstance(args.cutoff, (list, tuple)) else args.cutoff
@@ -313,6 +313,7 @@ Topsicle_output_prefix = "Topsicle"
 if __name__ == "__main__":
     start_time = time.time()
     parser = argparse.ArgumentParser(description='Topsicle - Telomere length estimation from long reads', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+
     parser.add_argument('--inputDir','-i', type=str, help='Required, Path to the input file or directory', required=True)
     parser.add_argument('--outputDir','-o', type=str, help='Required, Path to the output directory', required=True)
     parser.add_argument('--pattern', type=str, help='Required, Telomere pattern, for example, human has TTAGGG', required=True)

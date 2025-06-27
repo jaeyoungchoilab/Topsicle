@@ -15,18 +15,8 @@
 [2025-06-27 17:14:12] read_check: None
 [2025-06-27 17:14:12] override: False
 [2025-06-27 17:14:12] threads: None
----------------------
-[2025-06-27 17:14:12] Starting Topsicle analysis
-[2025-06-27 17:14:12] By default, Topsicle allocates nmber of cores: 24
-[2025-06-27 17:14:12] Output will be here: result_all/telolengths_all.csv
-[2025-06-27 17:14:12] No telophrase provided, use kmer: [5]
----------------------
-[2025-06-27 17:14:12] patterns to search: ['AAACC', 'AACCC', 'ACCCT', 'CCCTA', 'CCTAA', 'CTAAA', 'TAAAC', 'TTTGG', 'TTGGG', 'TGGGA', 'GGGAT', 'GGATT', 'GATTT', 'ATTTG']
-[2025-06-27 17:14:12] begin processing reads
-[2025-06-27 17:14:14] finished processing all reads
----------------------
-[2025-06-27 17:14:14] k-mer: 5, with TRC >= 0.7, median telomere length is 2110.00 bp
-[2025-06-27 17:14:14] asymptotic TRC, or recommended cutoff: 0.897
-[2025-06-27 17:14:14] Median telomere length for reads with TRC cutoff >= 0.897: 2050.00 bp
-[2025-06-27 17:14:14] All telomere found, have a nice day.
-Elapsed time(s): 1.92 seconds
+=======
+# log file when running Topsicle demo in the terminal directly
+[2025-06-12 09:20:24] Specified number of cores are/is: 4
+[2025-06-12 09:20:24] Output will be here: /kuhpc/work/jychoi/l233n428/Topsicle/Topsicle_demo/result_all/telolengths_all.csv
+[2025-06-12 09:20:24] No telophrase provided, use kmer: [5]

@@ -118,6 +118,7 @@ Run
 ```bash
 python3 main.py --help
 ```
+
 to get the explanation of each parameter:
 
 ```
@@ -186,9 +187,27 @@ Additional log file: [$output.log](Topsicle_demo/log_topsicle_demo.log)
 - Real-time update
 - Hard-choice TRC cutoff and median of telomere length if using this cutoff (line 11)
 - Asymptotic TRC cutoff (line 12) and corresponding median telomere length (line 13). The asymptotic TRC is recommended if a hard-choice TRC cutoff can not be initially determined. 
+=======
+
+- [$read.csv](Topsicle_demo/result_justone/rawcount_4_1.csv): Raw count output used for calculating the sliding window and mean telomere repeat count (flag **--rawcountpattern**)
+
+#### Detailed summary
+Example output: [telolengths_all.csv](Topsicle_demo/telolengths_all.csv) 
+
+Main output of Topsicle and updates in real time while Topsicle is running. 
+- file_number: Name of the input file(s) in the directory
+- phrase: The phase of the k-mer used for searching. By default, if the telomere pattern is 6-bp long, Topsicle will find 4-mer patterns (phrase = 4)
+- trc: Telomere repeat count value of that read. This statistics is used for determining reads sequenced from the telomere (see the publication). 
+- readID: ID of read
+- telo_length: Estimated telomere length of read
+
+Additional log file: [$output.log](Topsicle_demo/log_topsicle_demo.log)
+- Information about resources used (number of cores, time, location of output)
+- Real-time update
+- Hard-choice TRC cutoff and median of telomere length if using this cutoff (line 11)
+- Asymptotic TRC cutoff (line 12) and corresponding median telomere length (line 13). The asymptotic TRC is recommended if a hard-choice TRC cutoff can not be initially determined. 
 
 If there is no line with "**All telomere found, have a nice day**" then Topsicle did not examine all possible reads in the raw data. The user can rerun the process or pick up the previous run by analyzing the smaller dataset containing reads that potentially have telomeres, called *Temporary fasta file*, as in line 8 of the demo log file. It is recommended to provide more resources and have a strict TRC cutoff value as well (any TRC > 0.6 will be strict). Also see section [3. Troubleshooting](#3-troubleshooting). 
-
 
 ### 2.2: Plotting and visualization of raw data (Optional)
 Plot telomere k-mer matches in the sequencing read and a heatmap counting the different phases of the telomere k-mer.
@@ -258,4 +277,3 @@ This issue usually appears when running whole genome analysis but using fewer th
 2. If the analysis keeps cancelling after several attempts, please keep in mind that even though Topsicle returns some results in the telolength_all.csv file, it might not look through and contain results from every read with telomere and their length. However, this file should provide some information. We also recommend submitting an issue request on GitHub if this keeps happening.
 
 **Note:** It will echo **"All telomere found, have a nice day."** when Topsicle checked all reads in the dataset. It is highly recommended to have a log file and look for this line when running Topsicle on a big dataset.
-
