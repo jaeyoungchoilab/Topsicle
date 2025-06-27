@@ -464,7 +464,7 @@ def rawCountPattern(filepath, read, pattern_telo, windowSize, slide, trimfirst, 
     return pd.DataFrame(rawcount_all, columns=['tail', 'position', 'pattern', 'count'])
 
 # automate get TRC values and its corresponding telomere length
-def fit_quadratic_and_find_vertex(trc_list, telo_length_list):
+def fit_quadratic_and_find_vertex(trc_list, telo_length_list,inputtrc,median_trc,save_path=None):
     """
     Fit a quadratic curve to TRC and telomere length data,
     and find the TRC value where the derivative is zero (vertex).
@@ -474,5 +474,29 @@ def fit_quadratic_and_find_vertex(trc_list, telo_length_list):
     coeffs = np.polyfit(trc_arr, telo_arr, 2)
     a, b, c = coeffs
     vertex_x = -b / (2 * a)
+
+    if vertex_x > 1.0:
+        vertex_x = median_trc
+    if vertex_x < inputtrc:
+        vertex_x = inputtrc
+
     vertex_y = a * vertex_x**2 + b * vertex_x + c
+        
+    #plot trc vs telomere length fit
+    if save_path:
+        x_fit = np.linspace(min(trc_arr), max(trc_arr), 100)
+        y_fit = a * x_fit**2 + b * x_fit + c
+        plt.figure(figsize=(7, 5))
+        plt.scatter(trc_arr, telo_arr, color='blue', label='Topsicle results')
+        plt.plot(x_fit, y_fit, color='red', label='Fit line')
+        plt.scatter([vertex_x], [vertex_y], color='green', label='Vertex')
+        plt.xlabel('TRC values')
+        plt.ylabel('Telomere length, each read (bp)')
+        plt.title('Quadratic fit plot')
+        plt.legend()
+        plt.tight_layout()
+        if save_path:
+            plt.savefig(save_path, dpi=300)
+        plt.close()
+
     return vertex_x, vertex_y, coeffs
