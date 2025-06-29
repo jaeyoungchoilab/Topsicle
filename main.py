@@ -277,8 +277,12 @@ def analysis_run(args):
 
             if vertex_x > 1.0:
                 tprint(f"Asymptotic TRC {vertex_x:.3f} is greater than 1.0, which is not expected. See plot.")
-                tprint(f"Using median TRC value ({median_trc:.3f}) as asymptotic TRC instead.")
-                vertex_x = median_trc
+                if median_trc < 1.0:
+                    tprint(f"Using median TRC value ({median_trc:.3f}) as asymptotic TRC instead.")
+                    vertex_x = median_trc
+                else:
+                    tprint(f"Using 0.9 as asymptotic TRC instead, since asymptotic is greater than 1.0.")
+                    vertex_x = 0.9
             if vertex_x < 0.4:
                 tprint("Quadratic fit suggests asymptotic TRC less than 0.4. See plot with fit line")
                 if max_trc < 0.4:
@@ -286,8 +290,6 @@ def analysis_run(args):
                 if vertex_x < inputtrc:
                     tprint(f"Asymptotic TRC {vertex_x:.3f} is less than input cutoff {inputtrc:.3f}. Topsicle declares input TRC (={inputtrc}) as asymptotic TRC.")
                     vertex_x = inputtrc
-            if vertex_x == inputtrc:
-                vertex_x = inputtrc
             
             tprint(f"asymptotic TRC, or recommended cutoff: {vertex_x:.3f}")
 
@@ -322,7 +324,7 @@ if __name__ == "__main__":
     parser.add_argument('--telophrase', nargs='+', type=int, help=' k-mer of telomere pattern, can be 4, 5,... ')
     parser.add_argument('--cutoff',nargs='+', type=float, help='Threshold of TRC to be telomere, can be 0.4, 0.5,... ', default=0.7)
     parser.add_argument('--windowSize', type=int, help='Sliding window size', default=100)
-    parser.add_argument('--slide', type=int, help=' Window sliding step, default is initial telomere length', default=6)
+    parser.add_argument('--slide', type=int, help=' Window sliding step, default is initial telomere length')
     parser.add_argument('--trimfirst', type=int, help='Trimming off first number of base pair to prevent adapter', default=100)
     parser.add_argument('--maxlengthtelo', type=int, help='Longest value can be for telomere or sequence', default=20000)
     parser.add_argument('--plot', action='store_true', help='Plot of changes in mean window and change point detected, boolean, presence=True')
