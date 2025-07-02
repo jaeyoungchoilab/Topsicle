@@ -312,7 +312,9 @@ def analysis_run(args):
 version_number = "1.0.0"
 Topsicle_output_prefix = "Topsicle"
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
+def main():
+    import sys
     start_time = time.time()
     parser = argparse.ArgumentParser(description='Topsicle - Telomere length estimation from long reads', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
@@ -340,3 +342,6 @@ if __name__ == "__main__":
     end_time = time.time()
     elapsed = end_time - start_time
     print(f"Elapsed time(s): {elapsed:.2f} seconds")
+
+if __name__ == "__main__":
+    main()

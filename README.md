@@ -38,21 +38,15 @@ Cloning the package [Topsicle](https://github.com/jaeyoungchoilab/Topsicle.git):
 
 ```bash
 git clone https://github.com/jaeyoungchoilab/Topsicle.git # clone repo
-cd Topsicle
-
-# verify the cloning process, need to change main.py to the actual path 
-python3 main.py -h
 ```
 
 ### 1.2. Install requirements 
 ``` bash
 cd Topsicle
-pip install -r requirements.txt
+pip install -e .
 ```
 
-Make sure that we installed dependencies in the **requirements.txt** files, but the user might need to install Cython manually.
-
-To manually install those packages instead of using the requirement file:
+With upcoming [pip update](https://github.com/pypa/pip/issues/11457), cython might requires to be installed mannually. Also, to manually install dependencies:
 
 ``` 
 biopython>=1.75
@@ -65,13 +59,21 @@ ruptures==1.1.9
 seaborn>=0.11.2
 ```
 
+Verify the installation:
+```bash
+topsicle --help
+
+## can also call the main.py file to run Topsicle
+# python3 Topsicle/main.py --help
+```
+
 ## 2. Running Topsicle 
 
 ### 2.1.1: Quick example of running Topsicle
 
 General example:
 ```bash
-python3 main.py \
+topsicle \
   --inputDir $input_dir \
   --outputDir $output_dir \
   --pattern $telo_pattern
@@ -79,7 +81,7 @@ python3 main.py \
 
 Demo file example:
 ```bash
-python3 main.py \
+topsicle \
   --inputDir Topsicle_demo/data_col0_teloreg_chr \
   --outputDir Topsicle_demo/result_temp \
   --pattern AAACCCT
@@ -97,7 +99,7 @@ Note that when running Topsicle on your data, it might return more files than ju
 
 Detailed example run:
 ```bash
-python3 main.py \
+topsicle \
   --inputDir $input_dir \
   --outputDir $output_dir \
   --pattern $telo_pattern \
@@ -114,12 +116,7 @@ python3 main.py \
   --override
 ```
 
-Run
-```bash
-python3 main.py --help
-```
-
-to get the explanation of each parameter:
+Explanation of each parameter (run topsicle --help):
 
 ```
 Topsicle - Telomere length estimation from long reads
@@ -172,6 +169,8 @@ The red line indicate the estimated telomere-subtelomere boundary point.
 
 - [$read.csv](Topsicle_demo/result_justone/rawcount_4_1.csv): Raw count output used for calculating the sliding window and mean telomere repeat count (flag **--rawcountpattern**)
 
+- log file with parameters Topsicle had and results
+
 #### Detailed summary
 Example output: [telolengths_all.csv](Topsicle_demo/telolengths_all.csv) 
 
@@ -211,6 +210,8 @@ If there is no line with "**All telomere found, have a nice day**" then Topsicle
 
 ### 2.2: Plotting and visualization of raw data (Optional)
 Plot telomere k-mer matches in the sequencing read and a heatmap counting the different phases of the telomere k-mer.
+
+As a note, this option is not developed to be called directly yet, we still need to call it using python3 /PATH/overview_plot.py as below:
 
 ```bash
 python3 overview_plot.py \

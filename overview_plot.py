@@ -1,5 +1,7 @@
 # This script is used to run the Topsicle analysis on a set of fastq or fasta files.
 # it will return a lot of files - descriptive plot, heatmap and mean window plots 
+# it's not fully developed yet so user needs to run as 
+# python3 /PATH/overview_plot.py --commands
 
 import sys
 import os

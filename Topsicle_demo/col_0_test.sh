@@ -21,7 +21,7 @@ telo_pattern=CCCTAAA                                      # telomere pattern
 # Output: telolengths_all.csv for telomere in all reads 
 # also mean window plots, .csv files of raw count of each kmer pattern
 
-python3 main.py \
+topsicle \
   --inputDir $input_dir \
   --outputDir $output_dir \
   --pattern $telo_pattern \
@@ -49,7 +49,7 @@ python3 overview_plot.py \
 # Output: telolengths_all.csv for telomere in all reads 
 # also mean window plots, .csv files of raw count of each kmer pattern
 
-# python3 main.py \
+# topsicle \
 #   --inputDir $input_dir \
 #   --outputDir $output_dir \
 #   --pattern $telo_pattern \
