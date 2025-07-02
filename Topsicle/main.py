@@ -275,8 +275,8 @@ def analysis_run(args):
             
             #vertex_x, vertex_y, coeffs = fit_quadratic_and_find_vertex(phrase_to_trc[phrase], phrase_to_telo[phrase])
 
-            if vertex_x > 1.0:
-                tprint(f"Asymptotic TRC {vertex_x:.3f} is greater than 1.0, which is not expected. See plot.")
+            if vertex_x > max_trc:
+                tprint(f"Asymptotic TRC {vertex_x:.3f} is greater than max TRC, which is not expected. See plot.")
                 if median_trc < 1.0:
                     tprint(f"Using median TRC value ({median_trc:.3f}) as asymptotic TRC instead.")
                     vertex_x = median_trc
@@ -296,7 +296,7 @@ def analysis_run(args):
             # Get telomere lengths where TRC > vertex_x
             filtered_telolen = [
                 telo for trc, telo in zip(phrase_to_trc[phrase], phrase_to_telo[phrase])
-                if trc > vertex_x
+                if trc >= vertex_x
             ]
             if filtered_telolen:
                 median_filtered_telolen = np.median(filtered_telolen)
