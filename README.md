@@ -139,7 +139,7 @@ options:
                         3' (subtelomere)                                            5'
                         NNNNNNNNNNNNNNNNNNNNNAGGGTTAGGGTTAGGGTTAGGGTTAGGGTTAGGGTTAGGG
   --minSeqLength MINSEQLENGTH
-                        Minimum length a long read to be analyzed (default: 9000)
+                        Minimum length of a long read sequence to be analyzed by Topsicle (default: 9000)
   --rawcountpattern     Output raw count of pattern abundance for each window (default: False)
   --telophrase TELOPHRASE
                         k-mer of telomere pattern, can be 4, 5,... (default: None)
@@ -150,13 +150,13 @@ options:
   --trimfirst TRIMFIRST
                         Trimming off first number of base pair to prevent adapter (default: 100)
   --maxlengthtelo MAXLENGTHTELO
-                        Longest possible telomere length a long read can have (default: 20000)
+                        Longest possible telomere length a long read sequence can have (default: 20000)
   --plot                Plot of changes in mean window and change point detected, boolean, presence=True (default:
                         False)
   --rangecp RANGECP     optional, set range of changepoint plot for visualization purpose, default is maxlengthtelo
                         (default: None)
   --read_check READ_CHECK
-                        optional, to get telomere of a specific read (default: None)
+                        optional, Get telomere length of a specific sequencing read (default: None)
   --override, -ov       Override output file (default: False)
   --threads THREADS, -t THREADS
                         Number of CPU cores to use (by default, use all cores there) (default: None)
