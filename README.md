@@ -127,7 +127,11 @@ options:
                         Required, Path to the input file or directory (default: None)
   --outputDir OUTPUTDIR, -o OUTPUTDIR
                         Required, Path to the output directory (default: None)
-  --pattern PATTERN     Required, Telomere pattern, for example, human has TTAGGG (default: None)
+  --pattern PATTERN     Required, Telomere pattern, for example, human has AACCCT (default: None)
+                        NOTE the sequence needs to be in 5' to 3' orientation. In addition it assumes the subtelomere is in the 3' end.
+                        For example if input pattern is AACCCT (i.e. human) it assumes the following telomere sequence structure
+                        5'                                                          3' (subtelomere)
+                        AACCCTAACCCTAACCCTAACCCTAACCCTAACCCTNNNNNNNNNNNNNNNNNNNNNNNNN 
   --minSeqLength MINSEQLENGTH
                         Minimum length required for long read, default = 9kbp (default: 9000)
   --rawcountpattern     Output raw count of pattern abundance of each window (default: False)
