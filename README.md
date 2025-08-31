@@ -122,30 +122,35 @@ Explanation of each parameter (run topsicle --help):
 Topsicle - Telomere length estimation from long reads
 
 options:
-  -h, --help            show this help message and exit
+  -h, --help            Show this help message and exit
   --inputDir INPUTDIR, -i INPUTDIR
                         Required, Path to the input file or directory (default: None)
   --outputDir OUTPUTDIR, -o OUTPUTDIR
                         Required, Path to the output directory (default: None)
-  --pattern PATTERN     Required, Telomere pattern, for example, human has AACCCT (default: None)
+  --pattern PATTERN     Required, Telomere repeat sequence (default: None)
                         NOTE the sequence needs to be in 5' to 3' orientation. In addition it assumes the subtelomere is in the 3' end.
                         For example if input pattern is AACCCT (i.e. human) it assumes the following telomere sequence structure
+
                         5'                                                          3' (subtelomere)
-                        AACCCTAACCCTAACCCTAACCCTAACCCTAACCCTNNNNNNNNNNNNNNNNNNNNNNNNN 
+                        AACCCTAACCCTAACCCTAACCCTAACCCTAACCCTNNNNNNNNNNNNNNNNNNNNNNNNN
+
+                        AND
+
+                        3' (subtelomere)                                            5'
+                        NNNNNNNNNNNNNNNNNNNNNAGGGTTAGGGTTAGGGTTAGGGTTAGGGTTAGGGTTAGGG
   --minSeqLength MINSEQLENGTH
-                        Minimum length required for long read, default = 9kbp (default: 9000)
-  --rawcountpattern     Output raw count of pattern abundance of each window (default: False)
-  --telophrase TELOPHRASE [TELOPHRASE ...]
+                        Minimum length a long read to be analyzed (default: 9000)
+  --rawcountpattern     Output raw count of pattern abundance for each window (default: False)
+  --telophrase TELOPHRASE
                         k-mer of telomere pattern, can be 4, 5,... (default: None)
-  --cutoff CUTOFF [CUTOFF ...]
-                        Threshold of TRC to be telomere, can be 0.4, 0.5,... (default: 0.7)
+  --cutoff CUTOFF       TRC threshold (default: 0.7)
   --windowSize WINDOWSIZE
                         Sliding window size (default: 100)
-  --slide SLIDE         Window sliding step, default is initial telomere length (default: 6)
+  --slide SLIDE         Window sliding step size (default: 6)
   --trimfirst TRIMFIRST
                         Trimming off first number of base pair to prevent adapter (default: 100)
   --maxlengthtelo MAXLENGTHTELO
-                        Longest value can be for telomere or sequence (default: 20000)
+                        Longest possible telomere length a long read can have (default: 20000)
   --plot                Plot of changes in mean window and change point detected, boolean, presence=True (default:
                         False)
   --rangecp RANGECP     optional, set range of changepoint plot for visualization purpose, default is maxlengthtelo
