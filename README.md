@@ -13,13 +13,13 @@ Topsicle can analyze fasta or fastq data and outputs the length of each read wit
   * [2.1.1 Quick example of running Topsicle](#211-quick-example-of-running-topsicle)
   * [2.1.2 Detailed explanation of running Topsicle](#212-detailed-explanation-of-running-topsicle)
   * [2.1.3 Explanation of output](#213-explanation-of-output)
-  * [2.2. Plotting and visualization (Optional)](#22-plotting-and-visualization-optional)
+  * [2.2. Plotting and visualization of raw data(Optional)](#22-plotting-and-visualization-of-raw-data-optional)
   * [2.3. Topsicle workflow](#23-topsicle-workflow)
 * [3. Troubleshooting](#3-troubleshooting)
 
 ## 1. Getting started
 
-Topsicle is written in Python 3.6, but tested in Python 3.10 and Python 3.12 versions.
+Topsicle is written in Python 3.6, but tested in Python 3.10 and 3.12 versions.
 
 Let's get started with cloning this package from GitHub: 
 
@@ -46,11 +46,11 @@ cd Topsicle
 pip install -e .
 ```
 
-With upcoming [pip update](https://github.com/pypa/pip/issues/11457), cython might requires to be installed mannually. Also, to manually install dependencies:
+With upcoming [pip update](https://github.com/pypa/pip/issues/11457), cython might requires to be installed manually. Also, to manually install dependencies:
 
 ``` 
 biopython>=1.75
-cython >=0.29.21 
+cython>=0.29.21 
 matplotlib>=3.3.4
 matplotlib-inline>=0.1.6
 numpy>=1.22.4
@@ -91,9 +91,6 @@ topsicle \
 Topsicle will output: 
 - a .csv file (telolength_all.csv) with the telomere lengths of input reads
 - a quadratic fit plot to predict optimal TRC threshold (Telomere Repeat Count statisitcs, reflect how confident Topsicle is in identifying telomere of a read) and corresponding telomere length.
-- descriptive plots of the input data including heatmaps and the mean telomere k-mer counts per windows.
-
-Note that when running Topsicle on your data, it might return more files than just 5 files as in the Demo folder.
 
 ### 2.1.2: Detailed explanation of running Topsicle
 
@@ -127,17 +124,7 @@ options:
                         Required, Path to the input file or directory (default: None)
   --outputDir OUTPUTDIR, -o OUTPUTDIR
                         Required, Path to the output directory (default: None)
-  --pattern PATTERN     Required, Telomere repeat sequence (default: None)
-                        NOTE the sequence needs to be in 5' to 3' orientation. In addition it assumes the subtelomere is in the 3' end.
-                        For example if input pattern is AACCCT (i.e. human) it assumes the following telomere sequence structure
-
-                        5'                                                          3' (subtelomere)
-                        AACCCTAACCCTAACCCTAACCCTAACCCTAACCCTNNNNNNNNNNNNNNNNNNNNNNNNN
-
-                        AND
-
-                        3' (subtelomere)                                            5'
-                        NNNNNNNNNNNNNNNNNNNNNAGGGTTAGGGTTAGGGTTAGGGTTAGGGTTAGGGTTAGGG
+  --pattern PATTERN     Required, Telomere repeat sequence. The sequence needs to be in 5' to 3' orientation. In human, it should be CCCTAA, not TTAGGG (default: None)
   --minSeqLength MINSEQLENGTH
                         Minimum length of a long read sequence to be analyzed by Topsicle (default: 9000)
   --rawcountpattern     Output raw count of pattern abundance for each window (default: False)
@@ -169,6 +156,8 @@ Topsicle will output a .csv file containing the read ID and telomere length of a
 Main outputs of interest.
 - [telolengths_all.csv](Topsicle_demo/telolengths_all.csv): Output file with file number, IDs of reads in that file, and telomere length (default, always output this)
 - [$output.fastq](Topsicle_demo/result_justone/Col-0-6909_GWHBDNP00000001.1_nano_right.fastq_trc_over_0.4.fastq): Reads that passed TRC threshold
+- [log file](Topsicle_demo/result_justone/topsicle_run.log): Just in case user does not specific log file. Contains input values of parameters at the terminal (not actual values in the analysis, since there are optional paramters). From line 18 in the log file onwards are verbose and results.
+- [quadratic fit plot](Topsicle/Topsicle_demo/quadfit_5mer_CCCTAAA.png): Quadratic plot of Telomere Repeat Count values (x-axis) and telomere length (y-axis), with blue dots are Topsicle's result, red line is the quadratic best fit line, and green dot is the theoretical point where variation of telomere is smallest.
 
 Additional possible outputs based on flags: 
 - [$read.png](Topsicle_demo/result_justone/plot_4_1.png): Plot showing mean telomere repeat count by window and the telomere-subtelomere boundary point for each read (flag **--plot**).
@@ -178,7 +167,7 @@ The red line indicate the estimated telomere-subtelomere boundary point.
 
 - [$read.csv](Topsicle_demo/result_justone/rawcount_4_1.csv): Raw count output used for calculating the sliding window and mean telomere repeat count (flag **--rawcountpattern**)
 
-- log file with parameters Topsicle had and results
+Also telomere pattern for --pattern parameter should be pattern that commence at 5' end. For human, the pattern should be 5'-AACCCT motif, or in A. thaliana it has to be 5'-AAACCCT. More details is at [3. Troubleshooting](#3-troubleshooting).
 
 #### Detailed summary
 Example output: [telolengths_all.csv](Topsicle_demo/telolengths_all.csv) 
@@ -199,28 +188,14 @@ Additional log file: [$output.log](Topsicle_demo/log_topsicle_demo.log)
 
 - [$read.csv](Topsicle_demo/result_justone/rawcount_4_1.csv): Raw count output used for calculating the sliding window and mean telomere repeat count (flag **--rawcountpattern**)
 
-#### Detailed summary
-Example output: [telolengths_all.csv](Topsicle_demo/telolengths_all.csv) 
+If there is no line with "**All telomere found, have a nice day**" then Topsicle did not examine all possible reads in the raw data. The user can rerun the process or pick up the previous run by analyzing the smaller dataset containing reads that potentially have telomeres, called *Temporary fasta file*, as in line 8 of the demo log file. 
 
-Main output of Topsicle and updates in real time while Topsicle is running. 
-- file_number: Name of the input file(s) in the directory
-- phrase: The phase of the k-mer used for searching. By default, if the telomere pattern is 6-bp long, Topsicle will find 4-mer patterns (phrase = 4)
-- trc: Telomere repeat count value of that read. This statistics is used for determining reads sequenced from the telomere (see the publication). 
-- readID: ID of read
-- telo_length: Estimated telomere length of read
-
-Additional log file: [$output.log](Topsicle_demo/log_topsicle_demo.log)
-- Information about resources used (number of cores, time, location of output)
-- Real-time update
-- Hard-choice TRC cutoff and median of telomere length if using this cutoff (line 11)
-- Asymptotic TRC cutoff (line 12) and corresponding median telomere length (line 13). The asymptotic TRC is recommended if a hard-choice TRC cutoff can not be initially determined. 
-
-If there is no line with "**All telomere found, have a nice day**" then Topsicle did not examine all possible reads in the raw data. The user can rerun the process or pick up the previous run by analyzing the smaller dataset containing reads that potentially have telomeres, called *Temporary fasta file*, as in line 8 of the demo log file. It is recommended to provide more resources and have a strict TRC cutoff value as well (any TRC > 0.6 will be strict). Also see section [3. Troubleshooting](#3-troubleshooting). 
+It is recommended to provide more resources and have a strict TRC cutoff value as well (any TRC > 0.7 will be strict). Also see section [3. Troubleshooting](#3-troubleshooting). 
 
 ### 2.2: Plotting and visualization of raw data (Optional)
 Plot telomere k-mer matches in the sequencing read and a heatmap counting the different phases of the telomere k-mer.
 
-As a note, this option is not developed to be called directly yet, we still need to call it using python3 /PATH/overview_plot.py as below:
+As a note, this option is not developed to be called directly yet, so we still need to call it using python3 /PATH/overview_plot.py as below:
 
 ```bash
 python3 overview_plot.py \
@@ -271,7 +246,24 @@ It is advised to run this supplemental function prior to running the main functi
 ### 3.1. The code runs but no output
 1. Check pattern:
 
-The pattern input is recommended to be the pattern at the 5' end of the read. For example, in Col-0 A. thaliana, this pattern should be 'CCCTAAA', which is different in human and Mimulus. Getting the heatmap profile is also recommended.
+Based on the nature of Nanopore sequencing, telomere pattern sequence needs to be in 5' to 3' orientation. In addition it assumes the subtelomere is in the 3' end.
+
+For example if input pattern is AACCCT (i.e. human) it assumes the following telomere sequence structure
+
+5' AACCCTAACCCTAACCCTAACCCTAACCCTAACCCTNNNNNNNNNNNNNNNNNNNNNNNNN 3' (subtelomere)
+
+AND
+
+3' (subtelomere)
+NNNNNNNNNNNNNNNNNNNNNAGGGTTAGGGTTAGGGTTAGGGTTAGGGTTAGGGTTAGGG  5'
+
+For convenience, here are some recommended patterns for analyzed species:
+
+- Human: AACCCT
+- A. thaliana: AAACCCCT
+- Mimulus verbenaceus: AAACCG 
+
+Getting the heatmap profile is also recommended.
 
 2. Check flags and input:
 

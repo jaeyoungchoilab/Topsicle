@@ -39,7 +39,7 @@ def tprint(*args, **kwargs):
     now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     line = f"[{now}] {msg}"
     print(line)
-    # Write to log file if available
+    # Log file 
     if hasattr(tprint, "logfile"):
         with open(tprint.logfile, "a") as f:
             f.write(line + "\n")
@@ -65,7 +65,6 @@ def process_file(args, seq_loc, telo_phrase, pattern,sliding_val,lock):
     if os.path.exists(fasta_temp):
         tprint(f"Temporary fasta file already exists: {fasta_temp}. Using existing file.")
     else:
-        # Check if seq_loc is gzipped
         if seq_loc.endswith(".gz"):
             open_func = lambda f: gzip.open(f, "rt", encoding="utf-8")
             seq_format = "fastq" if seq_loc.endswith(".fastq.gz") or seq_loc.endswith(".fq.gz") else "fasta"
@@ -246,7 +245,7 @@ def analysis_run(args):
                 phrase_to_telo[telophrase].append(telolen)
                 phrase_to_trc[telophrase].append(trc_val)
 
-        # Compute medians for each telo_phrase
+    # Compute medians for each telo_phrase
     telo_phrases_sorted = sorted(phrase_to_telo)
     telo_phrase_medians = []
     median_telolen_list = []
@@ -312,7 +311,6 @@ def analysis_run(args):
 version_number = "1.0.0"
 Topsicle_output_prefix = "Topsicle"
 
-# if __name__ == "__main__":
 def main():
     import sys
     start_time = time.time()
@@ -320,7 +318,7 @@ def main():
 
     parser.add_argument('--inputDir','-i', type=str, help='Required, Path to the input file or directory', required=True)
     parser.add_argument('--outputDir','-o', type=str, help='Required, Path to the output directory', required=True)
-    parser.add_argument('--pattern', type=str, help='Required, Telomere pattern, for example, human has TTAGGG', required=True)
+    parser.add_argument('--pattern', type=str, help="Required, Telomere repeat sequence. The sequence needs to be in 5' to 3' orientation. In human, it should be CCCTAA, not TTAGGG (default: None)", required=True)
     parser.add_argument('--minSeqLength', type=int, help='Minimum length required for long read, default = 9kbp', default=9000)
     parser.add_argument('--rawcountpattern', action='store_true', help='Output raw count of pattern abundance of each window')
     parser.add_argument('--telophrase', nargs='+', type=int, help=' k-mer of telomere pattern, can be 4, 5,... ')

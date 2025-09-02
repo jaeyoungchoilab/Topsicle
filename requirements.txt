@@ -1,5 +1,5 @@
 biopython>=1.75
-cython >=0.29.21 # install cython so we can install ruptures 
+cython>=0.29.21 # install cython so we can install ruptures 
 matplotlib>=3.3.4
 matplotlib-inline>=0.1.6
 numpy>=1.22.4

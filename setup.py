@@ -21,7 +21,7 @@ setup(
     },
     description="Telomere boundary identification in long read sequencing - Topsicle",
     author="Dr. Jae Young Choi and Linh Nguyen",
-    author_email="jaeyoung.choi@ku.edu and linh.nguyen.1010@ku.edu",
+    author_email="jaeyoung.choi@ku.edu and nguyen.linh.1010@ku.edu",
     url="https://github.com/jaeyoungchoilab/Topsicle",  
     python_requires='>=3.6',
 
