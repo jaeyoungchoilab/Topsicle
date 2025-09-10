@@ -4,7 +4,7 @@
 
 This package is used to identify telomere boundaries and length using long-read sequencing data from ONT or PacBio platforms. 
 
-Topsicle can analyze fasta or fastq data and outputs the length of each read within that input file in a .csv file and supplemental plots. 
+Topsicle can analyze fasta or fastq data and outputs the estimated telomere length in a .csv file and can generate optional supplemental plots. 
 
 ## Table of contents
 
@@ -20,8 +20,6 @@ Topsicle can analyze fasta or fastq data and outputs the length of each read wit
 ## 1. Getting started
 
 Topsicle is written in Python 3.6, but tested in Python 3.10 and 3.12 versions.
-
-Let's get started with cloning this package from GitHub: 
 
 ### 1.1. From source (GitHub)
 
@@ -89,8 +87,8 @@ topsicle \
 [Topsicle_demo](Topsicle_demo) contains *A. thaliana* Col-0 reads from chromosome 1R reference genome (TAIR10, GCF_000001735.4). 
 
 Topsicle will output: 
-- a .csv file (telolength_all.csv) with the telomere lengths of input reads
-- a quadratic fit plot to predict optimal TRC threshold (Telomere Repeat Count statisitcs, reflect how confident Topsicle is in identifying telomere of a read) and corresponding telomere length.
+- a .csv file (telolength_all.csv) with the telomere lengths of each input reads passing the filtering parameters.
+- a quadratic fit plot to predict optimal TRC (Telomere Repeat Count statisitcs, which reflects how confident Topsicle is in identifying whether a read was sequenced from the telomere) threshold and corresponding telomere length.
 
 ### 2.1.2: Detailed explanation of running Topsicle
 
@@ -120,16 +118,16 @@ Explanation of each parameter (run topsicle --help):
 | -h, --help                   |           | Show this help message and exit                                                                    |
 | --inputDir, -i               | FILE/FOLDER | Required, Path to the input file or directory                                                     |
 | --outputDir, -o              | FOLDER    | Required, Path to the output directory                                                            |
-| --pattern                    | CHAR      | Required, Telomere repeat sequence (in 5' to 3' orientation). For e.g., in human, it's recommended to use CCCTAA                           |
-| --minSeqLength               | INT       | Minimum length required for long read (default: 9000)                                             |
-| --rawcountpattern            |           | Output raw count of pattern abundance of each window (default: False)                             |
-| --telophrase                 | INT [INT ...] | k-mer of telomere pattern, by default, telomere pattern length minus 2 (default: None)                  |
-| --cutoff                     | FLOAT [FLOAT ...] | Threshold of TRC to be telomere, can be 0.4, 0.5,... (default: 0.7)                        |
+| --pattern                    | CHAR      | Required, Telomere repeat sequence (in 5' to 3' orientation). For e.g., in human use CCCTAA                           |
+| --minSeqLength               | INT       | Minimum length of a long read sequence that will be analyzed (default: 9000)                              |
+| --rawcountpattern            |           | Output raw count of the k-mer for each window (default: False)                             |
+| --telophrase                 | INT [INT ...] | Length of telomere k-mer to search. By default will use telomere k-mer length minus 2 (default: None)            |
+| --cutoff                     | FLOAT [FLOAT ...] | TRC statistics threshold (default: 0.7)                        |
 | --windowSize                 | INT       | Sliding window size (default: 100)                                                                |
-| --slide                      | INT       | Window sliding step, default is initial telomere length (default: None)                           |
-| --trimfirst                  | INT       | Trimming off first number of base pair to prevent adapter (default: 100)                          |
-| --maxlengthtelo              | INT       | Longest value can be for telomere (default: 20000)                                    |
-| --plot                       |           | Plot of changes in mean window and change point detected, boolean (default: False)                         |
+| --slide                      | INT       | Window sliding step. Default is telomere k-mer length (default: None)                           |
+| --trimfirst                  | INT       | Length of intial number of base pairs to trim (default: 100)                          |
+| --maxlengthtelo              | INT       | Longest possible length of telomere for any given read (default: 20000)                              |
+| --plot                       |           | Optional, generate plot showing for each telomere read the abundance across the sequencing reead and the change point (default: False)                         |
 | --rangecp                    | INT       | Optional, set range of changepoint plot for visualization, default is maxlengthtelo (default: None)         |
 | --read_check                 | STR       | Optional, get telomere of a specific read (default: None)                                                   |
 | --override, -ov              |           | Override telolengths_all.csv file but keep subset fastq (default: False)                                                             |
@@ -140,12 +138,12 @@ Topsicle will output a .csv file containing the read ID and telomere length of a
 
 #### Quick summary
 Main outputs of interest.
-- [$telolengths_all.csv](Topsicle_demo/telolengths_all.csv): Output file with file number, IDs of reads in that file, and telomere length (default, always output this)
-- [$output.fastq](Topsicle_demo/result_justone/Col-0-6909_GWHBDNP00000001.1_nano_right.fastq_trc_over_0.4.fastq): Reads that passed TRC threshold
-- [$log file](Topsicle_demo/result_justone/topsicle_run.log): Just in case user does not specific log file. Contains input values of parameters at the terminal (not actual values in the analysis, since there are optional paramters). From line 18 in the log file onwards are verbose and results.
-- [$quadratic fit plot](Topsicle/Topsicle_demo/quadfit_5mer_CCCTAAA.png): Quadratic plot of Telomere Repeat Count values (x-axis) and telomere length (y-axis), with blue dots are Topsicle's result, red line is the quadratic best fit line, and green dot is the theoretical point where variation of telomere is smallest.
+- [$telolengths_all.csv](Topsicle_demo/telolengths_all.csv): Output file with file number, IDs of reads in that file, and telomere length.
+- [$output.fastq](Topsicle_demo/result_justone/Col-0-6909_GWHBDNP00000001.1_nano_right.fastq_trc_over_0.4.fastq): Reads that passed TRC threshold.
+- [$log file](Topsicle_demo/result_justone/topsicle_run.log): Prints input parameter values and output logs.
+- [$quadratic fit plot](Topsicle/Topsicle_demo/quadfit_5mer_CCCTAAA.png): Quadratic plot of Telomere Repeat Count values (x-axis) and telomere length (y-axis). Red line shows the line of best fit using a quadratic model and green dot is where change in telomere length estimates is lowest.
 
-Additional possible outputs based on flags: 
+Additional optional outputs based on flags: 
 - [$read.png](Topsicle_demo/result_justone/plot_4_1.png): Plot showing mean telomere repeat count by window and the telomere-subtelomere boundary point for each read (flag **--plot**).
 Example **mean window change plot** of a sequencing read:
 ![Mean window](Topsicle_demo/result_justone/plot_4_1.png)
@@ -153,17 +151,15 @@ The red line indicate the estimated telomere-subtelomere boundary point.
 
 - [$read.csv](Topsicle_demo/result_justone/rawcount_4_1.csv): Raw count output used for calculating the sliding window and mean telomere repeat count (flag **--rawcountpattern**)
 
-Also telomere pattern for --pattern parameter should be pattern that commence at 5' end. For human, the pattern should be 5'-AACCCT motif, or in A. thaliana it has to be 5'-AAACCCT. More details is at [Telomere pattern tips](#30-telomere-pattern-tips).
-
 #### Detailed summary
 Example output: [$telolengths_all.csv](Topsicle_demo/telolengths_all.csv) 
 
 Main output of Topsicle and updates in real time while Topsicle is running. 
-- file_number: Name of the input file(s) in the directory
-- phrase: The phase of the k-mer used for searching. By default, if the telomere pattern is 6-bp long, Topsicle will find 4-mer patterns (phrase = 4)
+- file_number: Name of the input file(s) in the directory.
+- phrase: The phase of the k-mer used for searching. By default, if the telomere pattern is 6-bp long, Topsicle will find 4-mer patterns (phrase = 4).
 - trc: Telomere repeat count value of that read. This statistics is used for determining reads sequenced from the telomere (see the publication). 
-- readID: ID of read
-- telo_length: Estimated telomere length of read
+- readID: ID of read.
+- telo_length: Estimated telomere length of read.
 
 Additional log file: [$output.log](Topsicle_demo/log_topsicle_demo.log)
 - Information about resources used (number of cores, time, location of output)
@@ -229,9 +225,9 @@ It is advised to run this supplemental function prior to running the main functi
 
 ### 3.0. Telomere pattern tips
 
-Based on the nature of Nanopore sequencing, telomere pattern sequences have to be in 5' to 3' orientation. In addition it assumes the subtelomere is in the 3' end.
+Telomere repeat sequence that will be searched in the long read data need to be in 5' to 3' orientation. In addition it assumes the subtelomere is in the 3' end.
 
-For example if input telomere pattern for -pattern parameter is **AACCCT** (i.e. human, and Topsicle will understand this as 5'-AACCCT) it assumes the following telomere sequence structure
+For example if input telomere pattern for -pattern parameter is **AACCCT** (i.e. mammalian telomere sequence) it assumes the following telomere sequence structure
 
 5' AACCCTAACCCTAACCCTAACCCTAACCCTAACCCTNNNNNNNNNNNNNNNNNNNNNNNNN 3' (subtelomere)
 
@@ -240,22 +236,13 @@ and
 3' (subtelomere)
 NNNNNNNNNNNNNNNNNNNNNAGGGTTAGGGTTAGGGTTAGGGTTAGGGTTAGGGTTAGGG  5'
 
-Also, if provide **TTAGGG** as the telomere pattern (5'-TTAGGG), Topsicle will only look for reads that are: 
+Here are example telomere sequences that were used as input sequence in our published study:
 
-5' TTAGGGTTAGGGTTAGGGTTAGGGTTAGGGTTAGGGNNNNNNNNNNNNNNNNNNNNNNNNN 3' (subtelomere)
-
-and
-
-3' (subtelomere)
-NNNNNNNNNNNNNNNNNNNNNNNNNAACCCTAACCCTAACCCTAACCCTAACCCTAACCCT 5'
-
-For convenience, here are some recommended patterns for analyzed species:
-
-- Human: CCCTAA (As recommended by [Schmidt et al., 2024](https://www.nature.com/articles/s41467-024-48917-7))
+- Human: CCCTAA 
 - A. thaliana: AAACCCCT
 - Mimulus verbenaceus: AAACCG 
 
-However, we emphasize that this relies heavily on Oxford Nanopore Technology, and highly recommend user to generate [heatmap profile](#22-plotting-and-visualization-of-raw-data-optional) to determine good pattern to run Topsicle on.
+We highly recommend the user to generate [heatmap profile](#22-plotting-and-visualization-of-raw-data-optional) and check the input telomere sequence.
 
 
 ### 3.1. The code runs but no output
