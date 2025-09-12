@@ -173,9 +173,9 @@ If there is no line with "**All telomere found, have a nice day**" then Topsicle
 It is recommended to provide more resources and have a strict TRC cutoff value as well (any TRC > 0.7 will be strict). Also see section [3. Troubleshooting](#3-troubleshooting). 
 
 ### 2.2: Plotting and visualization of raw data (Optional)
-Plot telomere k-mer matches in the sequencing read and a heatmap counting the different phases of the telomere k-mer.
+Plot telomere k-mer matches in the sequencing read and a heatmap counting the different phases of the telomere k-mer. We recommend to use as input data the reads that have passed the filters from Topsicle and used for estimating the telomere length.
 
-As a note, this option is not developed to be called directly yet, so we still need to call it using python3 /PATH/overview_plot.py as below:
+As a note, this option is not developed to be called directly yet, so we still need to call it using python3 $TOPSICLE_PATH/overview_plot.py as below:
 
 ```bash
 python3 overview_plot.py \
