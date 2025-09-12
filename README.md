@@ -1,4 +1,4 @@
-![TopsicleLogo](Topsicle/TopsicleLogo.png)
+<img src="Topsicle/TopsicleLogo.png" width="450">
 
 # Topsicle
 
@@ -190,11 +190,12 @@ python3 overview_plot.py \
 
 **Descriptive plot** displaying telomere repeat counts in the first 40 reads: 
 
-![Descriptive plot](Topsicle_demo/result_justone/descriptive_plot_1.png)
+<img src="Topsicle_demo/result_justone/descriptive_plot_1.png" width="500">
 
 **Heatmap** displaying telomere repeat count by telomere k-mers of different phases:
 
-![Heatmap](Topsicle_demo/result_justone/heatmap_1.png)
+<img src="Topsicle_demo/result_justone/heatmap_1.png" width="500">
+
 
 
 ### 2.3: Topsicle workflow 
