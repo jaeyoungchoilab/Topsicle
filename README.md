@@ -1,7 +1,5 @@
 <img src="Topsicle/TopsicleLogo.png" width="500">
 
-# Topsicle
-
 This package is used to identify telomere boundaries and length using long-read sequencing data from ONT or PacBio platforms. 
 
 Topsicle can analyze fasta or fastq data and outputs the estimated telomere length in a .csv file and can generate optional supplemental plots. 
