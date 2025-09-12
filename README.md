@@ -1,4 +1,4 @@
-<img src="Topsicle/TopsicleLogo.png" width="450">
+<img src="Topsicle/TopsicleLogo.png" width="500">
 
 # Topsicle
 
@@ -194,7 +194,7 @@ python3 overview_plot.py \
 
 **Heatmap** displaying telomere repeat count by telomere k-mers of different phases:
 
-<img src="Topsicle_demo/result_justone/heatmap_1.png" width="500">
+<img src="Topsicle_demo/result_justone/heatmap_1.png" width="450">
 
 
 
