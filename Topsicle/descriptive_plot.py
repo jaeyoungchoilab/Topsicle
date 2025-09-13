@@ -42,7 +42,11 @@ def check_file_type(filepath):
 
 
 def unzip_file(filepath):
-    """Read sequences from a FASTQ or FASTA file (can be compressed or uncompressed)."""
+    """
+    Read sequences from a FASTQ or FASTA file (compressed or uncompressed)
+    input: the path of the file
+    yield sequence content 
+    """
     if not isinstance(filepath, str):
         logging.error("Input must be a string representing the file path.")
         return None
@@ -59,8 +63,27 @@ def unzip_file(filepath):
                 yield sequence
     except Exception as e:
         logging.error(f"Error parsing file: {e}")
-
         #sys.exit("there is problem with input in", filepath, " Terminate.")
+
+def seq_cut_windows(s, window_size, step):
+    """
+    Generate overlapping windows of a given size from a sequence along with their start and end indices.
+    
+    seq: The input sequence (can be a list, string, etc.)
+    window_size: The size of each window
+    step: The number of elements to slide between windows (default is 1)
+
+    return: A tuple containing the window start index, end index, and the window itself.
+    """
+    # Loop to create windows with overlap
+    windows=[]
+    for i in range(0, len(s) - window_size + 1, step):
+        start = i  # Starting index of the window
+        end = i + window_size - 1  # Ending index of the window
+        if end > len(s):
+            end = len(s)
+        windows.append((start, s[start:end]))
+    return windows  # Return indices and window
 
 # descriptive plot
 def descriptive_plot(filepath, pattern, minSeqLength):
@@ -80,7 +103,10 @@ def descriptive_plot(filepath, pattern, minSeqLength):
     # Apply the translation to the sequence
     patterns = [pattern.upper(),pattern.translate(trans_table).upper()]
     # For viz purpose 
-    labels_pre = [pattern.upper(),pattern.translate(trans_table).upper()[::-1]]
+    labels_pre = [
+        f"5'-{pattern.upper()}-3'",
+        f"3'-{pattern.translate(trans_table).upper()[::-1]}-5'"]
+
     k_line = 0
     read_ids=[]
     added_labels=set()
@@ -95,7 +121,7 @@ def descriptive_plot(filepath, pattern, minSeqLength):
             seq = str(read.seq[:minSeqLength]).upper()   # no need to plot all, just to some first kbp is enough to observe
             read_ids.append(read.name)
             seq_2 = str(read.seq[::-1][:minSeqLength]).upper() # comp strand (reverse of reverse comp)
-            
+
             # Loop through each pattern
             for i, pattern in enumerate(patterns):
                 matches = [m.start() for m in re.finditer(re.compile(pattern), seq)]
@@ -119,7 +145,6 @@ def descriptive_plot(filepath, pattern, minSeqLength):
 
         # Add legend to differentiate patterns, but make it reverse 
         handles, labels = ax.get_legend_handles_labels()
-    
         
         labels=labels_pre
         ax.legend(handles, labels, title="Pattern")  
@@ -195,7 +220,6 @@ def patterns_to_search (telopattern, cut_length):
         ### make trans_table 
         trans_table = str.maketrans('ACGT', 'TGCA')
     
-        # Apply the translation to the sequence
         comp_pattern = [seq.translate(trans_table) for seq in origin_pattern]
         comp_pattern_rev = [seq[::-1] for seq in comp_pattern]
 
@@ -225,22 +249,23 @@ def patterns_vs_match_heatmap (filepath, telopattern,telophrase,minSeqLength):
     
     # Apply the translation to the sequence
     pattern_all = pattern_scramble_telo (telopattern, cut_length=telophrase)
-    # double check patterns we look for
-    # print("Patterns topsicle is finding:")
-    # print(pattern_all)
+
+    print(pattern_all)
 
     matches=[]
     matches_2_list=[]
+
     if unzip_file(filepath) == None: 
         print('problem in filepath, can not have heatmap')
         return None 
-    
+    y_axis_order=set()
+
     for read in unzip_file(filepath):
-        if len(read.seq) > minSeqLength:
+        if len(read.seq) > minSeqLength: #and read.name=="55c8cfdf-b256-4fbc-b526-0191c4a4591c"
             read_ids=[]
-            seq = str(read.seq[:minSeqLength]).upper()   # no need to plot all, just to 9kbp is enough to observe
+            seq = str(read.seq[100:2000]).upper()   # plot telomere patterns + matches from 100-2000bp positions
             read_ids.append(read.name)
-            seq_2 = str(read.seq[::-1][:minSeqLength]).upper() # reverse comp)
+            seq_2 = str(read.seq[::-1][100:2000]).upper()
             trans_table = str.maketrans('ACGT', 'TGCA')
     
             #translation for 2nd strand 
@@ -250,13 +275,11 @@ def patterns_vs_match_heatmap (filepath, telopattern,telophrase,minSeqLength):
             for i, pattern in enumerate(pattern_all):
                 finding=int(len(telopattern)-telophrase)
                 dots='.'*finding  # number of match after pattern 
-                regex = re.compile(rf"{pattern}({dots})")
-                # Find all matches
-                # print("regex",regex)
+                regex=re.compile(rf"{re.escape(pattern)}(.{{{finding}}})")
+\
                 matches_1 = regex.finditer(seq)
                 matches_2 = regex.finditer(seq_2)
                 
-                y_axis_order=set()
                 # Append the pattern and matches to the results list
                 for match in matches_1:
                     y_axis_order.add(match.group(1))
@@ -267,7 +290,6 @@ def patterns_vs_match_heatmap (filepath, telopattern,telophrase,minSeqLength):
     
     matches_df = pd.DataFrame(matches, columns=["Pattern", "Match","read id"]) 
     matches_2_df = pd.DataFrame(matches_2_list, columns=["Pattern", "Match","read id"]) 
-    # y_axis_order=list(y_axis_order)
     matches_df['Match'] = pd.Categorical(matches_df['Match'],y_axis_order)
     matches_2_df['Match'] = pd.Categorical(matches_2_df['Match'],y_axis_order)
 
@@ -277,20 +299,14 @@ def patterns_vs_match_heatmap (filepath, telopattern,telophrase,minSeqLength):
     match_order = sorted(allstrands["Match"].dropna().unique())
     allstrands["Match"] = pd.Categorical(allstrands["Match"], categories=match_order, ordered=True)
 
-
-    fig, ax = plt.subplots(figsize=(5, 8)) 
+    fig, ax = plt.subplots(figsize=(8, 8),dpi=300) 
     y_axis_order=list(y_axis_order)
-    # print('matches_df',matches_df)
 
-    # matches_2_df = matches_2_df.loc[y_axis_order]
     hist_data = pd.crosstab(allstrands["Match"], allstrands["Pattern"])
     ax = sns.heatmap(hist_data, annot=True, fmt="d", cmap="Blues", cbar_kws=dict(shrink=0.75))
     ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha='right')
     ax.set_ylabel("Match")
     ax.set_xlabel("Pattern")
-
-    # sns.histplot(data=allstrands, x="Pattern", y="Match",cbar=True, cbar_kws=dict(shrink=.75))
-    # ax.tick_params(axis='x', rotation=45)
    
    
     plt.suptitle(f"{telophrase}-bp patterns and matches from reads in \n {file_name}")
