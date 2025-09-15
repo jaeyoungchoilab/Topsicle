@@ -224,7 +224,11 @@ It is advised to run this supplemental function prior to running the main functi
 
 ### 3.0. Telomere pattern tips
 
-Telomere repeat sequence that will be searched in the long read data need to be in 5' to 3' orientation. In addition it assumes the subtelomere is in the 3' end.
+Telomere repeat sequence that will be searched in the long read data need to be 
+
+1) 5' to 3' orientation
+2) The telomere C-strand sequence
+3) Assumes the subtelomere is in the 3' end
 
 For example if input telomere pattern for -pattern parameter is **AACCCT** (i.e. mammalian telomere sequence) it assumes the following telomere sequence structure
 
