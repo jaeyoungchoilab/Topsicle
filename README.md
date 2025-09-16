@@ -242,7 +242,7 @@ NNNNNNNNNNNNNNNNNNNNNAGGGTTAGGGTTAGGGTTAGGGTTAGGGTTAGGGTTAGGG  5'
 Here are example telomere sequences that were used as input sequence in our published study:
 
 - Human: CCCTAA 
-- A. thaliana: AAACCCCT
+- A. thaliana: AAACCCT
 - Mimulus verbenaceus: AAACCG 
 
 We highly recommend the user to generate [heatmap profile](#22-plotting-and-visualization-of-raw-data-optional) and check the input telomere sequence.
