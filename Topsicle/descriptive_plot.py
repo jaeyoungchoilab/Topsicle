@@ -102,10 +102,11 @@ def descriptive_plot(filepath, pattern, minSeqLength):
     
     # Apply the translation to the sequence
     patterns = [pattern.upper(),pattern.translate(trans_table).upper()]
+    print(patterns, "here are patterns")
     # For viz purpose 
     labels_pre = [
         f"5'-{pattern.upper()}-3'",
-        f"3'-{pattern.translate(trans_table).upper()[::-1]}-5'"]
+        f"3'-{pattern.translate(trans_table).upper()}-5'"]
 
     k_line = 0
     read_ids=[]
@@ -132,7 +133,6 @@ def descriptive_plot(filepath, pattern, minSeqLength):
                     ax.scatter(matches, [k_line] * len(matches), color=colors[i], marker='|', zorder=2)
            
                 matches_2 = [m.start() for m in re.finditer(re.compile(pattern), seq_2)]
-                # tab in to indicate the pattern found at the end 
                 ax.scatter([x for x in matches_2], [k_line] * len(matches_2), color=colors[i], marker='|', zorder=2)
             # Increment the line position for the next read
             k_line += 2
@@ -142,8 +142,6 @@ def descriptive_plot(filepath, pattern, minSeqLength):
         # Add labels and title
         ax.set_title(f'Location of telomere patterns in {file_name}')
         ax.set_xlabel('Position')
-
-        # Add legend to differentiate patterns, but make it reverse 
         handles, labels = ax.get_legend_handles_labels()
         
         labels=labels_pre
@@ -159,7 +157,7 @@ def descriptive_plot(filepath, pattern, minSeqLength):
         plt.tight_layout()
 
         if iin > 40:
-            print("file has more than 40 reads, but it is not reccomended to have plot with that many reads")
+            print("file has more than 40 reads, but it is not recommended to have plot with that many reads")
             print("so the output plot will have 40 reads only")
             # show plot
             return "plotted"
@@ -276,7 +274,7 @@ def patterns_vs_match_heatmap (filepath, telopattern,telophrase,minSeqLength):
                 finding=int(len(telopattern)-telophrase)
                 dots='.'*finding  # number of match after pattern 
                 regex=re.compile(rf"{re.escape(pattern)}(.{{{finding}}})")
-\
+                
                 matches_1 = regex.finditer(seq)
                 matches_2 = regex.finditer(seq_2)
                 
