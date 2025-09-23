@@ -332,6 +332,7 @@ def main():
     parser.add_argument('--read_check',metavar="STR", type=str, help='Optional, get telomere of a specific read')
     parser.add_argument('--override','-ov', action='store_true', help='Override telolengths_all.csv file but keep subset fastq')
     parser.add_argument('--threads','-t',metavar="INT", type=int, help='Number of CPU cores to use (by default, all available cores)', default=None)
+    parser.add_argument('--version',"-v",action='version', version=f'Topsicle version v{version_number}', help="Show Topsicle's version number and exit")
 
     args = parser.parse_args()
     tprint.logfile = get_log_path(args)

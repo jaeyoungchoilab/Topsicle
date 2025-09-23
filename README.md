@@ -130,6 +130,7 @@ Explanation of each parameter (run topsicle --help):
 | --read_check                 | STR       | Optional, get telomere of a specific read (default: None)                                                   |
 | --override, -ov              |           | Override telolengths_all.csv file but keep subset fastq (default: False)                                                             |
 | --threads, -t                | INT       | Number of CPU cores to use (default: all available cores)                                                   |
+| --version, -v               |        |  Show program's version number and exit                                         |
 
 ### 2.1.3 Explanation of output
 Topsicle will output a .csv file containing the read ID and telomere length of all reads in the --inputDir that passed filtering.
