@@ -30,7 +30,7 @@ import matplotlib.pyplot as plt
 colors = sns.color_palette("colorblind",n_colors=30)
 sns.set_style("whitegrid", {'grid.color': 'grey', 'grid.linestyle': '--'})
 
-version_number = "1.0.0"
+version = "1.1.0"
 
 # check file type before processing 
 def check_file_type(filepath):
@@ -58,7 +58,7 @@ def pattern_scramble_telo (pattern, cut_length):
     '''
     pattern_scramble_telo: get the unique cuts from the initial sequence, along with pattern_to_search
     pattern: string, input desired patterns to scramble
-    cut_length: list, length wanna cut, recommend having 3 and 4 cut 
+    cut_length: list, length wanna cut, by default Topsicle cuts to all length - 2
     output: list of unique k-mers
     '''
     # double the pattern since telomere sequences are repetitive sequences of pattern
@@ -87,25 +87,12 @@ def patterns_to_search (telopattern, cut_length):
     telopattern: str or list of str, pattern of telomere
     cut_length: 4-bp from 6-bp pattern 
     '''
-    if "|" in telopattern and type(telopattern) == str: 
-        ## origin pattern: 'AACC|ACCG',...
-        origin_pattern = telopattern
-        origin_pattern_rev = origin_pattern[::-1]
-        
-        ## comp_pattern, the "TTTGGC" one 
-        ### make trans_table 
-        trans_table = str.maketrans('ACGT', 'TGCA')
-    
-        # Apply the translation to the sequence
-        comp_pattern = origin_pattern.translate(trans_table) 
-        comp_pattern_rev = comp_pattern[::-1] 
-        pattern_all = origin_pattern.upper() + comp_pattern.upper()
         
     if "|" not in telopattern and type(telopattern) == str: 
         # pattern scramble and work   
         ## origin pattern directly from the telopattern, "AAACCG"
         origin_pattern = pattern_scramble_telo(telopattern, cut_length=[cut_length]) 
-        origin_pattern_rev = [seq[::-1] for seq in origin_pattern]
+        # origin_pattern_rev = [seq[::-1] for seq in origin_pattern] # v1.1.0: force correct telomere pattern
         
         ## comp_pattern, the "TTTGGC" one 
         ### make trans_table 
@@ -113,16 +100,13 @@ def patterns_to_search (telopattern, cut_length):
     
         # Apply the translation to the sequence
         comp_pattern = [seq.translate(trans_table) for seq in origin_pattern]
-        comp_pattern_rev = [seq[::-1] for seq in comp_pattern]
+        # comp_pattern_rev = [seq[::-1] for seq in comp_pattern]
 
         # all patterns 
         pattern_all = origin_pattern + comp_pattern
         pattern_all=[element.upper() for element in pattern_all]
 
-    if type(telopattern) == list:
-        pattern_all=[element.upper() for element in telopattern]
-
-    return pattern_all
+    return origin_pattern, comp_pattern
 
 def unzip_file(filepath):
     """
@@ -164,8 +148,15 @@ def patternTRC_count(filepath, telopattern, read_length=0, kmer=4, no_bp=1000, c
     raw_count = []
 
     # get the list of patterns to search for 
-    pattern_all = patterns_to_search(telopattern, cut_length=kmer)
-    compiled_patterns = [re.compile(pattern) for pattern in pattern_all]
+    origin_pattern, comp_pattern = patterns_to_search(telopattern, cut_length=kmer)
+    # pattern_all=origin_pattern + comp_pattern
+    # print(pattern_all, "all patterns check step 1")
+    # print(origin_pattern, "orig")
+    # compiled_patterns = [re.compile(pattern) for pattern in pattern_all]
+
+    compiled_patterns_ori = [re.compile(pattern) for pattern in origin_pattern]
+    compiled_patterns_comp = [re.compile(pattern) for pattern in comp_pattern]
+
 
     if isinstance(filepath, list):
         print("Can only process 1 file path at the time, please loop paths through the list")
@@ -178,12 +169,20 @@ def patternTRC_count(filepath, telopattern, read_length=0, kmer=4, no_bp=1000, c
             ratio_perfect_hit = no_bp / len(telopattern)
             itcs_indi = [['seq id', 'pattern', 'TRC forward strand', 'TRC reverse strand']]
             
-            for pattern in compiled_patterns: 
+            # v1.1.0: Count matches separately for origin patterns (use seq_start)
+            for pattern in compiled_patterns_ori:
                 matches_start = len([m.start() for m in pattern.finditer(seq_start)])
-                matches_end = len([m.start() for m in pattern.finditer(seq_end)])
-                
                 count_pattern_start = matches_start / ratio_perfect_hit
+                # v1.1.0: For origin patterns, don't count seq_end here; set end count to 0
+                count_pattern_end = 0
+                itcs_indi.append([seq.id, pattern.pattern, count_pattern_start, count_pattern_end])
+
+            # same thing, but complement patterns (w seq_end)
+            for pattern in compiled_patterns_comp:
+                matches_end = len([m.start() for m in pattern.finditer(seq_end)])
                 count_pattern_end = matches_end / ratio_perfect_hit
+                # For complement patterns, don't count on seq_start here; set start to 0
+                count_pattern_start = 0
                 itcs_indi.append([seq.id, pattern.pattern, count_pattern_start, count_pattern_end])
 
             raw_count.append(itcs_indi)
@@ -246,8 +245,9 @@ def bound_detect(filepath, read, pattern_telo, windowSize, slide, trimfirst, max
         print("can only read in 1 read at a time")
         return None
 
-    patterns = patterns_to_search(pattern_telo, cut_length=cut_length)
-    compiled_patterns = [re.compile(pattern) for pattern in patterns]
+    origin_pattern, comp_pattern = patterns_to_search(pattern_telo, cut_length=cut_length)
+    compiled_patterns_ori = [re.compile(pattern) for pattern in origin_pattern]
+    compiled_patterns_comp = [re.compile(pattern) for pattern in comp_pattern]
 
     sequences = unzip_file(filepath)
     if sequences is None:
@@ -279,14 +279,14 @@ def bound_detect(filepath, read, pattern_telo, windowSize, slide, trimfirst, max
         for start, seq_cut in windows_start:
             count_matches_read = [
                 len([m.start() for m in pattern.finditer(seq_cut)]) or 1
-                for pattern in compiled_patterns
+                for pattern in compiled_patterns_ori
             ]
             mean_s.append(("forward", start, sum(count_matches_read) / len(count_matches_read)))
 
         for start, seq_cut_2 in windows_end:
             count_matches_read = [
                 len([m.start() for m in pattern.finditer(seq_cut_2)]) or 1
-                for pattern in compiled_patterns
+                for pattern in compiled_patterns_comp
             ]
             mean_e.append(("reverse", start, sum(count_matches_read) / len(count_matches_read)))
 
@@ -375,8 +375,9 @@ def rawCountPattern(filepath, read, pattern_telo, windowSize, slide, trimfirst, 
         print("can only read in 1 read at a time")
         return None
 
-    patterns = patterns_to_search(pattern_telo, cut_length=cut_length)
-    compiled_patterns = [re.compile(pattern) for pattern in patterns]
+    origin_pattern, comp_pattern = patterns_to_search(pattern_telo, cut_length=cut_length)
+    compiled_patterns_ori = [re.compile(pattern) for pattern in origin_pattern]
+    compiled_patterns_comp = [re.compile(pattern) for pattern in comp_pattern]
 
     sequences = unzip_file(filepath)
     if sequences is None:
@@ -401,13 +402,13 @@ def rawCountPattern(filepath, read, pattern_telo, windowSize, slide, trimfirst, 
         rawpattern_s = [
             ("forward", start, pattern.pattern, len([m.start() for m in pattern.finditer(seq_cut)]) or 1)
             for start, seq_cut in windows_start
-            for pattern in compiled_patterns
+            for pattern in compiled_patterns_ori
         ]
 
         rawpattern_e = [
             ("reverse", start, pattern.pattern, len([m.start() for m in pattern.finditer(seq_cut_2)]) or 1)
             for start, seq_cut_2 in windows_end
-            for pattern in compiled_patterns
+            for pattern in compiled_patterns_comp
         ]
 
         if tail == 'forward':

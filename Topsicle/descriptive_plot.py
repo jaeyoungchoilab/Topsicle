@@ -178,7 +178,7 @@ def pattern_scramble_telo (pattern, cut_length):
     if type(cut_length)!= list:
         cut_length = [cut_length]
        
-    # Loop over each cut length (3 and 4)
+    # Loop over each cut length, by default, it's k-2
     for length in cut_length:
         for i in range(len(pattern) - length + 1):
             # Extract the substring of the given length

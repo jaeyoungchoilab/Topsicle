@@ -4,6 +4,12 @@ This package is used to identify telomere boundaries and length using long-read 
 
 Topsicle can analyze fasta or fastq data and outputs the estimated telomere length in a .csv file and can generate optional supplemental plots. 
 
+### Citation
+If this method has been useful, please cite us at:
+Nguyen, L., & Choi, J. Y. (2025). Topsicle: a method for estimating telomere length from whole genome long-read sequencing data. *Genome Biology*, 26(1), 295.
+
+[https://genomebiology.biomedcentral.com/articles/10.1186/s13059-025-03783-4](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-025-03783-4)
+
 ## Table of contents
 
 * [1. Getting started](#1-getting-started)
@@ -60,7 +66,7 @@ Verify the installation:
 topsicle --help
 
 ## can also call the main.py file to run Topsicle
-# python3 Topsicle/main.py --help
+# python3 $TOPSICLE_PATH/main.py --help
 ```
 
 ## 2. Running Topsicle 
@@ -165,7 +171,6 @@ Additional log file: [$output.log](Topsicle_demo/log_topsicle_demo.log)
 - Real-time update
 - Hard-choice TRC cutoff and median of telomere length if using this cutoff (line 11)
 - Asymptotic TRC cutoff (line 12) and corresponding median telomere length (line 13). The asymptotic TRC is recommended if a hard-choice TRC cutoff can not be initially determined. 
-=======
 
 If there is no line with "**All telomere found, have a nice day**" then Topsicle did not examine all possible reads in the raw data. The user can rerun the process or pick up the previous run by analyzing the smaller dataset containing reads that potentially have telomeres, called *Temporary fasta file*, as in line 8 of the demo log file. 
 
@@ -177,7 +182,7 @@ Plot telomere k-mer matches in the sequencing read and a heatmap counting the di
 As a note, this option is not developed to be called directly yet, so we still need to call it using python3 $TOPSICLE_PATH/overview_plot.py as below:
 
 ```bash
-python3 overview_plot.py \
+python3 $TOPSICLE_PATH/overview_plot.py \
   --inputDir "$input_dir" \
   --outputDir "$output_dir" \
   --pattern $telo_pattern \
@@ -223,9 +228,9 @@ It is advised to run this supplemental function prior to running the main functi
 
 ## 3. Troubleshooting
 
-### 3.0. Telomere pattern tips
+### 3.0. Telomere pattern
 
-Telomere repeat sequence that will be searched in the long read data need to be 
+Telomere repeat sequence that will be searched in the long read data need to be:
 
 1) 5' to 3' orientation
 2) The telomere C-strand sequence
@@ -253,7 +258,7 @@ We highly recommend the user to generate [heatmap profile](#22-plotting-and-visu
 
 1. Check telomere pattern 
 
-See [3.0. Telomere pattern tips](#30-telomere-pattern-tips) for details.
+See [3.0. Telomere pattern](#30-telomere-pattern) for details.
 
 2. Check flags and input:
 

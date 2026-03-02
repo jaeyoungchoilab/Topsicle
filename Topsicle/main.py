@@ -171,7 +171,7 @@ def analysis_run(args):
     else:
         try:
             num_cores = len(os.sched_getaffinity(0))
-            tprint(f"By default, Topsicle allocates nmber of cores: {num_cores}")
+            tprint(f"By default, Topsicle allocates number of cores: {num_cores}")
         except AttributeError:
             num_cores = cpu_count()
             tprint(f"By default, Topsicle allocates number of cores: {num_cores}")
@@ -232,7 +232,7 @@ def analysis_run(args):
         with Manager() as manager:
             lock = manager.Lock()
             with Pool(processes=num_cores) as pool: 
-                results = pool.starmap(process_file, [(args, seq_loc, telo_phrase, pattern,sliding_val,lock) for seq_loc in filenames])
+                results = pool.starmap(process_file, [(args, seq_loc, telo_phrase, args.pattern,sliding_val,lock) for seq_loc in filenames])
 
         tprint("finished processing all reads")
         print("---------------------")
@@ -308,7 +308,7 @@ def analysis_run(args):
         
     return tprint("All telomere found, have a nice day.")
 
-version_number = "1.0.0"
+version = "1.1.0"
 Topsicle_output_prefix = "Topsicle"
 
 def main():
@@ -316,6 +316,10 @@ def main():
     start_time = time.time()
     parser = argparse.ArgumentParser(description='Topsicle - Telomere length estimation from long reads', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
+    parser.add_argument('-v', '--version', action='store_true', help='Topsicle version') # get version flag
+    if '--version' in sys.argv or '-v' in sys.argv:
+        print(f"Topsicle version {version}")
+        sys.exit(0)
     parser.add_argument('--inputDir','-i', type=str,metavar="FILE/FOLDER", help='Required, Path to the input file or directory', required=True)
     parser.add_argument('--outputDir','-o', type=str,metavar="FOLDER", help='Required, Path to the output directory', required=True)
     parser.add_argument('--pattern',metavar="CHAR", type=str, help="Required, Telomere repeat sequence (in 5' to 3' orientation). For e.g., in human use CCCTAA", required=True)
@@ -332,11 +336,9 @@ def main():
     parser.add_argument('--read_check',metavar="STR", type=str, help='Optional, get telomere of a specific read')
     parser.add_argument('--override','-ov', action='store_true', help='Override telolengths_all.csv file but keep subset fastq')
     parser.add_argument('--threads','-t',metavar="INT", type=int, help='Number of CPU cores to use (by default, all available cores)', default=None)
-    parser.add_argument('--version',"-v",action='version', version=f'Topsicle version v{version_number}', help="Show Topsicle's version number and exit")
 
     args = parser.parse_args()
     tprint.logfile = get_log_path(args)
-    
     analysis_run(args)
     end_time = time.time()
     elapsed = end_time - start_time
